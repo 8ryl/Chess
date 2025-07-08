@@ -1,0 +1,49 @@
+{
+  "name": "Chess",
+  "tree": {
+    "$className": "DataModel",
+
+    "ReplicatedStorage": {
+      "Packages": {
+        "$path": "Source/Packages"
+      },
+
+      "Dependencies": {
+        "$path": "Source/Dependencies"
+      }
+    },
+
+    "ServerScriptService": {
+      "Server": {
+        "$path": "Source/Server"
+      }
+    },
+
+    "StarterGui": {
+      "$className": "StarterGui",
+
+      "Display": {
+        "$className": "ScreenGui",
+        
+        "Libraries": {
+          "$className": "Folder",
+          "$path": "Source/Libraries"
+        }
+      }
+    },
+
+    "StarterPlayer": {
+      "StarterPlayerScripts": {
+        "Client": {
+          "$path": "Source/Client"
+        }
+      }
+    },
+
+    "SoundService": {
+      "$properties": {
+        "RespectFilteringEnabled": true
+      }
+    }
+  }
+}

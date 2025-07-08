@@ -1,0 +1,4 @@
+std = "roblox"
+
+[global]
+disable = ["unused_local"]
