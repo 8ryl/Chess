@@ -1,6 +1,4 @@
 --[[
-	Configuration Module
-
 	This module defines common constants, delays, animation settings, and interface-related parameters.
 	It centralizes every tweakable value for easy adjustments across the game.
 
@@ -20,17 +18,14 @@ local Configuration = {
 }
 
 -- Cooldown durations (in seconds) for certain actions or systems
+
 Configuration.Cooldown = {
 	Small = 2.5,
 	Medium = 5,
 	Long = 10,
 }
 
---[[
-	Default constants for common logic and interface usage
-
-	I use 'Zero' and 'One' for consistency—personal preference for cleaner-looking code.
-]]
+-- Default constants for common logic and interface usage
 
 Configuration.Default = {
 	Zero = math.round(0.25), -- Rounded value often used for transparency
@@ -38,7 +33,7 @@ Configuration.Default = {
 
 	On = true, -- Boolean 'On' state
 	Off = false, -- Boolean 'Off' state
-	Null = nil, -- Represents a null/empty state
+	Null = nil, -- Represents a null state
 }
 
 local Default = Configuration.Default
@@ -57,24 +52,22 @@ Configuration.Request = {
 Configuration.Popup = {
 	Delay = Configuration.Delay.Semi, -- Animation duration for popups
 
-	Blur = { On = 15, Off = 2.5 }, -- Blur intensity for background effect
-	Shadow = { On = 0.45, Off = Default.One }, -- Transparency of shadow overlay
-	Panel = { On = Default.Zero, Off = Default.One }, -- Transparency of panel (zero = visible)
-
 	Style = Enum.EasingStyle.Sine, -- Easing style for smooth animations
 	Direction = Enum.EasingDirection.Out, -- Easing direction
-}
 
--- Settings for hover animations on buttons
+	Blur = { On = 15, Off = 2.5 },
+	Shadow = { On = 0.45, Off = Default.One },
+	Panel = { On = Default.Zero, Off = Default.One },
+}
 
 Configuration.Hovering = {
 	Delay = Configuration.Delay.Semi, -- Duration of hover animation
 
-	Size = 2.5 / 100, -- Scale change percentage for hover effect (5% larger)
-
 	Style = Enum.EasingStyle.Sine, -- Easing style for hover
 	Direction = Enum.EasingDirection.Out, -- Easing direction for hover
 }
+
+Configuration.Hovering.Size = 2.5 / 100 -- Scale change percentage for hover effect (5% larger)
 
 -- Pre-built TweenInfo for Request animations
 Configuration.Request.Animation =
@@ -91,8 +84,8 @@ Configuration.Hovering.Animation = function(Count, Reversable)
 		Configuration.Hovering.Style,
 		Configuration.Hovering.Direction,
 
-		Reversable, -- Number of repeats (default zero)
-		Count -- Whether the animation reverses (default false)
+		Reversable or Default.Zero, -- Number of repeats (default zero)
+		Count or Default.Off -- Whether the animation reverses (default false)
 	)
 end
 
