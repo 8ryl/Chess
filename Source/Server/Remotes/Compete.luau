@@ -1,12 +1,13 @@
+local Server = game:GetService("ServerScriptService")
 local Storage = game:GetService("ReplicatedStorage")
-local HttpService = game:GetService("HttpService")
-local Server = game:GetService("Players")
+local Contenders = game:GetService("Players")
 
+local Directory = Server.Storage
 local Packages = Storage.Packages
 local Dependencies = Storage.Dependencies
 
 local Knit = require(Packages.Knit)
-local Settings = require(Dependencies.Settings)
+local Parameters = require(Directory.Parameters)
 local Configuration = require(Dependencies.Configuration)
 
 local Default = Configuration.Default
@@ -71,22 +72,15 @@ end
 	- After deploying, it clears the challenge.
 ]]
 
-function Service.Accept(Client, Opponent)
+function Service.Accept(Client, Opponent, Name)
 	local Initialization = Knit.GetService("BoardInitialization")
+
+	local Template = Parameters.Template(Client, Opponent, Name)
 
 	if Challenges[Opponent] then
 		-- Deploy the chessboard with the two players.
 
-		Initialization:Deploy({
-			Competitors = {
-				Black = Client,
-				White = Opponent,
-			},
-
-			Identifier = HttpService:GenerateGUID(Default.Off),
-
-			Mode = Settings.Modes.Rapid, -- Game mode, can be modified later.
-		})
+		Initialization:Deploy(Template)
 	end
 
 	-- Clear the challenge after accepting.
@@ -114,7 +108,7 @@ end
 
 function Service:KnitInit()
 	-- Initialize challenges list for all currently connected players at server start
-	for Name, Client in Server:GetPlayers() do
+	for Name, Client in Contenders:GetPlayers() do
 		Service.Add(Client)
 	end
 
@@ -124,14 +118,14 @@ function Service:KnitInit()
 	end)
 
 	-- Handle challenge acceptances from clients
-	Signals.Accept:Connect(function(Client, Opponent)
+	Signals.Accept:Connect(function(Client, Opponent, Name)
 		-- TODO: Prevent the client from initiating more than two concurrent games
 
-		return Service.Accept(Client, Opponent)
+		return Service.Accept(Client, Opponent, Name)
 	end)
 
 	-- Automatically set up challenges list for players who join later
-	Server.PlayerAdded:Connect(Service.Add)
+	Contenders.PlayerAdded:Connect(Service.Add)
 
 	-- Handle challenge rejections from clients
 	Signals.Deny:Connect(Service.Reject)

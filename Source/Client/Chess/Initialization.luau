@@ -12,6 +12,8 @@ local Configuration = require(Dependencies.Configuration)
 local Default = Configuration.Default
 local Preferences = Settings.Camera
 
+local Client = Utilities.GetClientAsync()
+
 --[[
 	Knit controller that listens for chessboard initialization events.
 
@@ -22,6 +24,8 @@ local Preferences = Settings.Camera
 local Component = Knit.CreateController({
 	Name = "ChessInitializationListener",
 })
+
+Component.Cache = {}
 
 -- Adjusts the camera to focus on the chessboard from above, considering orientation
 
@@ -59,9 +63,59 @@ end
 -- Adds sensors (aka ClickDetectors) to chess pieces for interaction.
 
 function Component.Sensors(Chessboard, Pieces)
-	print(Chessboard, Pieces)
+	local Service = Knit.GetService("Registry")
+	local Projector = Knit.GetController("Projector")
 
-	-- TODO: Attach ClickDetectors to pieces for player interaction
+	-- Iterates over each piece in the provided directory.
+
+	for Name, Object in Pieces:GetChildren() do
+		-- Creates a ClickDetector for each piece (Unit).
+
+		local Sensor = Utilities.CreateInstance("ClickDetector", {
+			MaxActivationDistance = 10e6, -- Effectively unlimited activation range
+
+			Parent = Object, -- Parents the Sensor to the piece
+			Name = "Sensor", -- Names the Sensor to "Sensor"
+		})
+
+		local Attribute: string = Object:GetAttribute("Piece")
+
+		-- Sets up the detector to respond to click input on this piece
+
+		Sensor.MouseClick:Connect(function()
+			-- Retrieves the cached path for the object, or invoke the service method and await the result
+
+			--[[
+			There is a problem with caching is it doesn't update the cache when the piece has moved
+
+			local Status, Path = Utilities.TryAccessOrCompute(Component.Cache, Object, function()
+				-- Do not ADD an "await" call, as that automatically happens when wrapping.
+
+				return Service[Attribute](Client, Object)
+			end)
+			]]
+
+			if Projector.Connection then
+				return "There is already an ongoing connection"
+			end
+
+			local Status, Path = Service[Attribute](Client, Object):await()
+
+			-- Guard statement to ensure the service call completed successfully
+
+			assert(Status, "Failed to retrieve path for the specified piece via service method.")
+
+			-- Assigns the computed path to the cache only when no cached entry exists.
+
+			if not Component.Cache[Object] then
+				Component.Cache[Object] = Path
+			end
+
+			-- Project the resolved path onto the chessboard using the projector
+
+			return Projector:Project(Path, Object, Chessboard)
+		end)
+	end
 end
 
 --[[

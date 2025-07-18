@@ -1,5 +1,5 @@
 local Storage = game:GetService("ReplicatedStorage")
-local Server = game:GetService("Players")
+local Contenders = game:GetService("Players")
 
 local Packages = Storage:WaitForChild("Packages")
 local Dependencies = Storage:WaitForChild("Dependencies")
@@ -26,13 +26,15 @@ local Component = Knit.CreateController({
 	Name = "Compete",
 })
 
---[[
-	Adds a player entry to the Compete section's user interface.
-]]
+-- Adds a player entry to the Compete section's user interface.
 
 function Component.Add(Client)
 	local Signal = Knit.GetService("Signal")
-	local Clone = Container.Object:Clone()
+
+	local Clone = Utilities.CloneInstance(Container.Object, {
+		Visible = Default.On,
+		Parent = Holder,
+	})
 
 	local Username = Clone.Username
 	local Thumbnail = Clone.Thumbnail
@@ -46,32 +48,25 @@ function Component.Add(Client)
 	Challenge.Activated:Connect(function()
 		-- 'Client' parameter resembles the challenger himself
 
-		Signal.Request:Fire(Client)
+		return Signal.Request:Fire(Client)
 	end)
-
-	Clone.Parent = Holder
-	Clone.Visible = Default.On
 end
 
---[[
-	Removes a player entry from the Compete section's user interface
-]]
+-- Removes a player entry from the Compete section's user interface
 
 function Component.Remove(Client)
 	return Holder:FindFirstChild(Client.DisplayName):Destroy()
 end
 
---[[
-	Initializes the Compete controller when Knit starts.
-]]
+-- Initializes the Compete controller when Knit starts.
 
 function Component:KnitStart()
-	for Name, Client in Server:GetPlayers() do
+	for Name, Client in Contenders:GetPlayers() do
 		Component.Add(Client)
 	end
 
-	Server.PlayerAdded:Connect(Component.Add)
-	Server.PlayerRemoving:Connect(Component.Remove)
+	Contenders.PlayerAdded:Connect(Component.Add)
+	Contenders.PlayerRemoving:Connect(Component.Remove)
 end
 
 return Component

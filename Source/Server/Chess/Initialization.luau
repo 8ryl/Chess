@@ -1,13 +1,16 @@
+local Server = game:GetService("ServerScriptService")
 local Storage = game:GetService("ReplicatedStorage")
-local Server = game:GetService("ServerStorage")
+local Assets = game:GetService("ServerStorage")
 
 local Packages = Storage.Packages
 local Dependencies = Storage.Dependencies
 
-local Chess = Server.Chessboard
+local Chess = Assets.Chessboard
+local Directory = Server.Storage
 
 local Knit = require(Packages.Knit)
 local Settings = require(Dependencies.Settings)
+local Parameters = require(Directory.Parameters)
 local Utilities = require(Dependencies.Utilities)
 local Configuration = require(Dependencies.Configuration)
 
@@ -23,6 +26,7 @@ local Service = Knit.CreateService({
 })
 
 local Client = Service.Client
+local Matches = Parameters.Matches
 
 -- Initializes a new chessboard for a match
 
@@ -37,9 +41,7 @@ function Service.Board:Initialize(Content)
 	-- Position the chessboard based on the number of active matches
 
 	Chessboard:PivotTo(
-		CFrame.new(
-			Vector3.new(Settings.Offset.X * #Settings.Matches, Settings.Offset.Y, Settings.Offset.Z * #Settings.Matches)
-		)
+		CFrame.new(Vector3.new(Settings.Offset.X * #Matches, Settings.Offset.Y, Settings.Offset.Z * #Matches))
 	)
 
 	return Chessboard
@@ -56,15 +58,43 @@ function Service:Deploy(Content)
 
 	task.wait(Configuration.Delay.Semi)
 
+	-- Loop through each individual pieces inside the concurrent directory
+
+	for Name, Folder in Content.Board.Pieces:GetChildren() do
+		for Set, Piece in Folder:GetChildren() do
+			-- Retrieve the stored coordinates from the piece's attributes
+
+			local Coordinates = Piece:GetAttribute("Coordinates")
+
+			-- yAxis refers to the vertical columns, while xAxis refers to the horizontal rows.
+
+			local yAxis, xAxis = Coordinates.Offset, Coordinates.Scale
+
+			-- Ensures the Row table exists before assigning a value to a specific column.
+
+			if not Content.Storage[xAxis] then
+				Content.Storage[xAxis] = {}
+			end
+
+			-- Stores the coordinates into the content's internal storage with it's piece
+
+			Content.Storage[xAxis][yAxis] = Piece
+
+			-- Assign a unique identifier to the piece for tracking or grouping
+
+			Piece:SetAttribute("Identifier", Content.Identifier)
+		end
+	end
+
 	-- Notify competitors about their assigned board and pieces
 
 	for Name, Competitor in Content.Competitors do
-		Client.All:Fire(Competitor, Content.Board, Settings.Orientation[Name], Content.Board.Pieces[Name])
+		Client.All:Fire(Competitor.User, Content.Board, Settings.Orientation[Name], Content.Board.Pieces[Name])
 	end
 
 	-- Register this match into the active matches list
 
-	return table.insert(Settings.Matches, Content)
+	Parameters.Matches[Content.Identifier] = Content
 end
 
 return Service

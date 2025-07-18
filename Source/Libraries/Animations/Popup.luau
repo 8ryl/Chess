@@ -1,5 +1,5 @@
-local Animation = game:GetService("TweenService")
 local Storage = game:GetService("ReplicatedStorage")
+local Animation = game:GetService("TweenService")
 local Lighting = game:GetService("Lighting")
 
 local Packages = Storage:WaitForChild("Packages")

@@ -106,7 +106,7 @@ function Component.Display(Opponent)
 
 		-- Fire the 'Accept' signal to acknowledge the opponent's challenge
 
-		Signal.Accept:Fire(Opponent)
+		Signal.Accept:Fire(Opponent, "Rapid") --Change the mode accordingly
 
 		-- Accepts the request. Fires a Remote signal
 
@@ -180,7 +180,7 @@ function Component:KnitStart()
 
 	-- Listens for incoming requests and processes them.
 
-	Signal.Info:Connect(Component.Process)
+	return Signal.Info:Connect(Component.Process)
 end
 
 return Component

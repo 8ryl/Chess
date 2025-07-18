@@ -45,7 +45,9 @@ return {
 		Blitz = {
 			Time = 2.5, -- Time per player in minutes (Chess.com)
 		},
-	},
 
-	Matches = {}, -- Stores the data for ongoing matches
+		Default = {
+			Time = 15, -- Time per player in minutes (Chess.com)
+		},
+	},
 }

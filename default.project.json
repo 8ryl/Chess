@@ -5,7 +5,7 @@
 
     "ReplicatedStorage": {
       "Packages": {
-        "$path": "Source/Packages"
+        "$path": "Packages"
       },
 
       "Dependencies": {
@@ -14,7 +14,7 @@
     },
 
     "ServerScriptService": {
-      "Server": {
+      "Storage": {
         "$path": "Source/Server"
       }
     },

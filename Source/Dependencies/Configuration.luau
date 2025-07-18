@@ -60,6 +60,22 @@ Configuration.Popup = {
 	Panel = { On = Default.Zero, Off = Default.One },
 }
 
+Configuration.Highlight = {
+	Delay = Configuration.Delay.Fast, -- Duration of highlight animation
+
+	Style = Enum.EasingStyle.Sine, -- Easing style for highlight
+	Direction = Enum.EasingDirection.Out, -- Easing direction for highlight
+}
+
+-- Represents the piece movement
+
+Configuration.Movement = {
+	Delay = Configuration.Delay.Fast, -- Duration of highlight animation
+
+	Style = Enum.EasingStyle.Sine, -- Easing style for highlight
+	Direction = Enum.EasingDirection.Out, -- Easing direction for highlight
+}
+
 Configuration.Hovering = {
 	Delay = Configuration.Delay.Semi, -- Duration of hover animation
 
@@ -69,20 +85,28 @@ Configuration.Hovering = {
 
 Configuration.Hovering.Size = 2.5 / 100 -- Scale change percentage for hover effect (5% larger)
 
--- Pre-built TweenInfo for Request animations
-Configuration.Request.Animation =
-	TweenInfo.new(Configuration.Popup.Delay, Configuration.Popup.Style, Configuration.Popup.Direction)
+local Request = Configuration.Request
+local Highlight = Configuration.Highlight
+local Popup = Configuration.Popup
+local Movement = Configuration.Movement
+local Hovering = Configuration.Hovering
 
--- Pre-built TweenInfo for Popup animations
-Configuration.Popup.Animation =
-	TweenInfo.new(Configuration.Popup.Delay, Configuration.Popup.Style, Configuration.Popup.Direction)
+-- Pre-built TweenInfo Animations
+
+Request.Animation = TweenInfo.new(Request.Delay, Request.Style, Request.Direction)
+
+Highlight.Animation = TweenInfo.new(Highlight.Delay, Highlight.Style, Highlight.Direction)
+
+Movement.Animation = TweenInfo.new(Movement.Delay, Movement.Style, Movement.Direction)
+
+Popup.Animation = TweenInfo.new(Popup.Delay, Popup.Style, Popup.Direction)
 
 -- Function returning TweenInfo for hover animations (reversible with optional repeat count)
-Configuration.Hovering.Animation = function(Count, Reversable)
+Hovering.Animation = function(Count, Reversable)
 	return TweenInfo.new(
-		Configuration.Hovering.Delay,
-		Configuration.Hovering.Style,
-		Configuration.Hovering.Direction,
+		Hovering.Delay,
+		Hovering.Style,
+		Hovering.Direction,
 
 		Reversable or Default.Zero, -- Number of repeats (default zero)
 		Count or Default.Off -- Whether the animation reverses (default false)

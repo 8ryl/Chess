@@ -1,11 +1,11 @@
-local Script = game:GetService("ServerScriptService")
+local Server = game:GetService("ServerScriptService")
 local Storage = game:GetService("ReplicatedStorage")
-local Server = game:GetService("Players")
+local Contenders = game:GetService("Players")
 
 local Dependencies = Storage.Dependencies
 local Packages = Storage.Packages
 
-local Directory = Script.Server
+local Directory = Server.Storage
 local Store = Directory.Store
 
 local Knit = require(Packages.Knit)
@@ -20,10 +20,10 @@ local Default = Configuration.Default
 
 local Service = Knit.CreateService({
 	Name = "DatabaseHandlerModule",
-})
 
-Service.Client = {}
-Service.Profiles = {}
+	Client = {},
+	Profiles = {},
+})
 
 -- Change the database name before releasing to reset the data.
 
@@ -76,14 +76,14 @@ function Service.Connect(Client: Player)
 
 	local Profile: Profile = Database:StartSessionAsync(Service.RetrieveProfileKeyIdentifier(Client), {
 		Cancel = function()
-			return not Client:IsDescendantOf(Server)
+			return not Client:IsDescendantOf(Contenders)
 		end,
 	})
 
 	-- If the session couldn't start, kick the player to prevent issues.
 
 	if not Profile then
-		return Client:Kick("Data error occured, retry again later.")
+		return Client:Kick("Anomalous behavior identified — operation temporarily suspended. retry again later.")
 	end
 
 	Profile:AddUserId(Client.UserId) -- GDPR compliance.
@@ -92,12 +92,13 @@ function Service.Connect(Client: Player)
 	-- Handles unexpected session end (e.g., profile locked elsewhere).
 
 	Profile.OnSessionEnd:Connect(function()
-		return Client:Kick("Data error occured, retry again later."), Service.Remove(Client)
+		return Client:Kick("Anomalous behavior identified — operation temporarily suspended. retry again later."),
+			Service.Remove(Client)
 	end)
 
 	-- Check if the player is still in the game after session setup.
 
-	if Client:IsDescendantOf(Server) then
+	if Client:IsDescendantOf(Contenders) then
 		-- Store the profile and initialize the player's leaderboard.
 
 		Service.Profiles[Client] = Profile
@@ -156,12 +157,12 @@ end
 ]]
 
 function Service:KnitStart()
-	for Name, Player in Server:GetPlayers() do
+	for Name, Player in Contenders:GetPlayers() do
 		task.spawn(Service.Connect, Player)
 	end
 
-	Server.PlayerAdded:Connect(Service.Connect)
-	Server.PlayerRemoving:Connect(Service.Disconnect)
+	Contenders.PlayerAdded:Connect(Service.Connect)
+	Contenders.PlayerRemoving:Connect(Service.Disconnect)
 end
 
 return Service
