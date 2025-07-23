@@ -2,6 +2,7 @@ local Server = game:GetService("ServerScriptService")
 local Storage = game:GetService("ReplicatedStorage")
 local Assets = game:GetService("ServerStorage")
 
+local Vault = Server.Storage
 local Packages = Storage.Packages
 local Dependencies = Storage.Dependencies
 
@@ -9,8 +10,8 @@ local Chess = Assets.Chessboard
 local Directory = Server.Storage
 
 local Knit = require(Packages.Knit)
+local Schema = require(Vault.Schema)
 local Settings = require(Dependencies.Settings)
-local Parameters = require(Directory.Parameters)
 local Utilities = require(Dependencies.Utilities)
 local Configuration = require(Dependencies.Configuration)
 
@@ -26,7 +27,7 @@ local Service = Knit.CreateService({
 })
 
 local Client = Service.Client
-local Matches = Parameters.Matches
+local Matches = Schema.Matches
 
 -- Initializes a new chessboard for a match
 
@@ -94,7 +95,7 @@ function Service:Deploy(Content)
 
 	-- Register this match into the active matches list
 
-	Parameters.Matches[Content.Identifier] = Content
+	Schema.Matches[Content.Identifier] = Content
 end
 
 return Service

@@ -95,8 +95,10 @@ function Component.Sensors(Chessboard, Pieces)
 			end)
 			]]
 
+			-- Disconnects an ongoing connection when there is one.
+
 			if Projector.Connection then
-				return "There is already an ongoing connection"
+				Projector:Disconnect()
 			end
 
 			local Status, Path = Service[Attribute](Client, Object):await()

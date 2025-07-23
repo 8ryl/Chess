@@ -1,4 +1,5 @@
 local Server = game:GetService("ServerScriptService")
+local HttpService = game:GetService("HttpService")
 local Storage = game:GetService("ReplicatedStorage")
 local Contenders = game:GetService("Players")
 
@@ -7,7 +8,7 @@ local Packages = Storage.Packages
 local Dependencies = Storage.Dependencies
 
 local Knit = require(Packages.Knit)
-local Parameters = require(Directory.Parameters)
+local Settings = require(Dependencies.Settings)
 local Configuration = require(Dependencies.Configuration)
 
 local Default = Configuration.Default
@@ -75,7 +76,31 @@ end
 function Service.Accept(Client, Opponent, Name)
 	local Initialization = Knit.GetService("BoardInitialization")
 
-	local Template = Parameters.Template(Client, Opponent, Name)
+	local Template = {
+		Competitors = {
+			Black = { -- Contains metadata for the black-side player
+				User = Client, -- Reference to the player instance controlling black
+				Time = Settings.Modes[Name].Time, -- Assigned time control for black, based on selected mode
+			},
+
+			White = { -- Contains metadata for the white-side player
+				User = Opponent, -- Reference to the player instance controlling white
+				Time = Settings.Modes[Name].Time, -- Assigned time control for white, based on selected mode
+
+				-- Placeholder for custom square highlighting or additional attributes
+			},
+		},
+
+		History = {}, -- Records and stores every piece movement in the board.
+		Storage = {}, -- Stores the board cell the piece currently resides in
+
+		-- ^ This dictionary is used to track the position of pieces on the board.
+		-- It follows the structure: Storage[Colour][Row][Column] = piece
+
+		Mode = Settings.Modes[Name] or Settings.Modes.Default, -- Game mode, can be modified later.
+
+		Identifier = HttpService:GenerateGUID(Configuration.Default.Off),
+	}
 
 	if Challenges[Opponent] then
 		-- Deploy the chessboard with the two players.
