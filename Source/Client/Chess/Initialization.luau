@@ -9,7 +9,6 @@ local Settings = require(Dependencies.Settings)
 local Utilities = require(Dependencies.Utilities)
 local Configuration = require(Dependencies.Configuration)
 
-local Keywords = Configuration.Keywords
 local Preferences = Settings.Camera
 
 local Client = Utilities.GetClientAsync()
@@ -52,9 +51,9 @@ function Component.Camera(Chessboard, Orientation)
 	]]
 
 	local Base = CFrame.new(Center)
-		* CFrame.Angles(Keywords.Zero, Yaw, Keywords.Zero)
-		* CFrame.new(Keywords.Zero, Preferences.Offset.Y, Preferences.Offset.Z)
-		* CFrame.Angles(Preferences.Tilt.X, Keywords.Zero, Keywords.Zero)
+		* CFrame.Angles(0, Yaw, 0)
+		* CFrame.new(0, Preferences.Offset.Y, Preferences.Offset.Z)
+		* CFrame.Angles(Preferences.Tilt.X, 0, 0)
 
 	-- Set the camera to look toward the center of the chessboard from the computed position
 
@@ -73,7 +72,7 @@ function Component:Display(Interface, Console)
 			continue
 		end
 
-		Object.Visible = Keywords.Off
+		Object.Visible = false
 	end
 
 	for Name, Object in Console:GetChildren() do
@@ -81,10 +80,10 @@ function Component:Display(Interface, Console)
 			continue
 		end
 
-		Object.Visible = Keywords.On
+		Object.Visible = true
 	end
 
-	return Popup:Reset(Keywords.Off)
+	return Popup:Reset(false)
 end
 
 -- Adds sensors (aka ClickDetectors) to chess pieces for interaction.

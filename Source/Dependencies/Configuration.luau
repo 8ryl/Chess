@@ -1,138 +1,62 @@
-local Configuration = {}
+local Configuration = {
+	Delay = {
+		Tick = 0.065, -- Minimum frame-level delay for rapid updates
+		Fast = 0.125, -- Optimized delay for fast visual transitions
+		Semi = 0.175, -- Balanced delay for moderate transitions
 
---[[
-	Defines every constant such as:, delays, animation properties, and interface behavior parameters.
+		Medium = 0.375, -- Standard delay for noticeable animations
+		Long = 0.875, -- Extended delay for slow visual emphasis
+	},
 
-	This file centralizes every tweakable value to maintain consistency across the game.
-	Direct edits alter the timing, styling, and visual responses of interface elements.
-]]
+	Cooldown = {
+		Small = 2.5, -- Short duration for minor system resets
+		Medium = 5, -- Standard duration for general actions
+		Long = 10, -- Extended duration for critical systems
+	},
 
--- Time intervals (in seconds) for internal processes and visual transitions
+	Settings = {
+		Size = 0.035, -- Scale increment as a decimal (3.5%)
 
-Configuration.Delay = {
-	Tick = 0.065, -- Minimum frame-level delay for rapid updates
-	Fast = 0.125, -- Optimized delay for fast visual transitions
-	Semi = 0.175, -- Balanced delay for moderate transitions
-	Medium = 0.375, -- Standard delay for noticeable animations
-	Long = 0.875, -- Extended delay for slow visual emphasis
+		Opacity = { 0, 1 }, -- Panel opacity control values
+		BlurEffect = { 15, 2.5 }, -- Screen blur levels during popup states
+		ShadowTransparency = { 0.45, 1 }, -- Shadow intensity levels during transitions
+	},
 }
 
--- Preset cooldown durations (in seconds) for gameplay systems and user actions
+local Style = Enum.EasingStyle -- Easing styles
+local Direction = Enum.EasingDirection -- Easing directions
 
-Configuration.Cooldown = {
-	Small = 2.5, -- Short duration for minor system resets
-	Medium = 5, -- Standard duration for general actions
-	Long = 10, -- Extended duration for critical systems
-}
+local Delay = Configuration.Delay -- Delay values
+local Cooldown = Configuration.Cooldown -- Cooldown values
 
--- Base constants representing numerical and logical defaults
+local Settings = Configuration.Settings -- Animation settings
 
-Configuration.Keywords = {
-	Zero = math.round(0.25), -- Rounded baseline transparency or scale factor
-	One = math.round(1.25), -- Rounded maximum opacity or size factor
+-- Defines parameters for various interface and gameplay elements.
 
-	On = true, -- Logical true state
-	Off = false, -- Logical false state
-	Null = nil, -- Null state reference
-}
+Configuration.Request = TweenInfo.new(Delay.Medium, Style.Quad, Direction.Out)
 
-local Keywords = Configuration.Keywords
-local Delay = Configuration.Delay
+-- Defines parameters for the loading screen animations.
 
--- Configuration block for challenge request prompts and associated animations
-
-Configuration.Request = {
-	Delay = Delay.Medium, -- Duration of challenge prompt transition
-
-	Style = Enum.EasingStyle.Quad, -- Easing style for request animation
-	Direction = Enum.EasingDirection.Out, -- Easing direction for request animation
-}
-
--- Parameters for popup panels including visual depth, shadows, and opacity adjustments
-
-Configuration.Popup = {
-	Delay = Delay.Semi, -- Duration of popup entry and exit
-
-	Style = Enum.EasingStyle.Sine, -- Easing style for smooth popup motion
-	Direction = Enum.EasingDirection.Out, -- Easing direction for popup motion
-
-	Blur = { On = 15, Off = 2.5 }, -- Screen blur levels during popup states
-	Shadow = { On = 0.45, Off = Keywords.One }, -- Shadow intensity levels during transitions
-	Panel = { On = Keywords.Zero, Off = Keywords.One }, -- Panel opacity control values
-}
-
--- Parameters for piece selection highlights
-
-Configuration.Highlight = {
-	Delay = Delay.Fast, -- Duration of highlight effect
-
-	Style = Enum.EasingStyle.Sine, -- Easing style for highlight transition
-	Direction = Enum.EasingDirection.Out, -- Easing direction for highlight transition
-}
-
--- Parameters for chess piece movement animations
-
-Configuration.Movement = {
-	Delay = Delay.Fast, -- Duration of piece translation
-
-	Style = Enum.EasingStyle.Sine, -- Easing style for movement
-	Direction = Enum.EasingDirection.Out, -- Easing direction for movement
-}
-
--- Parameters for hover-based scale effects
-
-Configuration.Hovering = {
-	Size = 0.035, -- Scale increment as a decimal (3.5%)
-
-	Delay = Delay.Fast, -- Duration of hover scaling
-
-	Style = Enum.EasingStyle.Sine, -- Easing style for hover scaling
-	Direction = Enum.EasingDirection.Out, -- Easing direction for hover scaling
-}
-
-Configuration.Loading = {
-	Size = 0.075,
-
-	Delay = Delay.Long, -- Duration of hover scaling
-
-	Style = Enum.EasingStyle.Quint, -- Easing style for hover scaling
-	Direction = Enum.EasingDirection.Out, -- Easing direction for hover scaling
-}
-
--- Predefined TweenInfo instances for animations used in multiple components
-
-Configuration.Request.Animation =
-	TweenInfo.new(Configuration.Request.Delay, Configuration.Request.Style, Configuration.Request.Direction)
-
-Configuration.Loading.Animation = function(Count, Reverses)
-	return TweenInfo.new(
-		Configuration.Hovering.Delay,
-		Configuration.Hovering.Style,
-		Configuration.Hovering.Direction,
-		Count or Keywords.Zero,
-		Reverses or Keywords.Off
-	)
+Configuration.Loading = function(Reverses)
+	return TweenInfo.new(Delay.Fast, Style.Sine, Direction.InOut, 1, Reverses)
 end
 
-Configuration.Highlight.Animation =
-	TweenInfo.new(Configuration.Highlight.Delay, Configuration.Highlight.Style, Configuration.Highlight.Direction)
+-- Defines parameters for the button-on-hover animations.
 
-Configuration.Movement.Animation =
-	TweenInfo.new(Configuration.Movement.Delay, Configuration.Movement.Style, Configuration.Movement.Direction)
-
-Configuration.Popup.Animation =
-	TweenInfo.new(Configuration.Popup.Delay, Configuration.Popup.Style, Configuration.Popup.Direction)
-
--- Dynamic TweenInfo generator for hover animations with adjustable repeat and reverse properties
-
-Configuration.Hovering.Animation = function(Count, Reverses)
-	return TweenInfo.new(
-		Configuration.Hovering.Delay,
-		Configuration.Hovering.Style,
-		Configuration.Hovering.Direction,
-		Reverses or Keywords.Zero,
-		Count or Keywords.Off
-	)
+Configuration.Hover = function(Repetition, Reverses)
+	return TweenInfo.new(Delay.Fast, Style.Sine, Direction.InOut, Repetition, Reverses)
 end
+
+-- Defines parameters for the square highlighting animations.
+
+Configuration.Highlight = TweenInfo.new(Delay.Fast, Style.Sine, Direction.Out)
+
+-- Defines animation parameters for the chessboard piece movement.
+
+Configuration.Movement = TweenInfo.new(Delay.Fast, Style.Sine, Direction.Out)
+
+-- Sets parameters for the match request popup animations.
+
+Configuration.Popup = TweenInfo.new(Delay.Semi, Style.Sine, Direction.Out)
 
 return Configuration

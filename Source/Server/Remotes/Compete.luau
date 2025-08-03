@@ -11,7 +11,6 @@ local Knit = require(Packages.Knit)
 local Settings = require(Dependencies.Settings)
 local Configuration = require(Dependencies.Configuration)
 
-local Keywords = Configuration.Keywords
 local Cooldown = Configuration.Cooldown
 
 local Service = Knit.CreateService({
@@ -35,7 +34,7 @@ function Service.Reject(Client, Opponent)
 	if Challenges[Client][Opponent] then
 		-- Remove the challenge against the specific opponent from the client's list
 
-		Challenges[Client][Opponent] = Keywords.Null
+		Challenges[Client][Opponent] = nil
 	end
 end
 
@@ -90,6 +89,7 @@ function Service.Accept(Client, Opponent, Name)
 				Contender = Opponent, -- Reference to the player instance controlling white
 
 				Time = Settings.Modes[Name].Time, -- Assigned time control for white, based on selected mode
+
 				-- Placeholder for custom square highlighting or additional attributes
 			},
 		},
@@ -110,7 +110,7 @@ function Service.Accept(Client, Opponent, Name)
 	if Challenges[Opponent] then
 		-- Deploy the chessboard with the two players.
 
-		Initialization:Deploy(HttpService:GenerateGUID(Configuration.Keywords.Off), Template)
+		Initialization:Deploy(HttpService:GenerateGUID(false), Template)
 	end
 
 	-- Clear the challenge after accepting.

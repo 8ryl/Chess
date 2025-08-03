@@ -8,8 +8,6 @@ local Configuration = require(Dependencies.Configuration)
 local Utilities = require(Dependencies.Utilities)
 local Knit = require(Packages.Knit)
 
-local Keywords = Configuration.Keywords
-
 local PlayerGui = Utilities.GetDisplayAsync()
 
 local Display = PlayerGui:WaitForChild("Display")
@@ -32,7 +30,7 @@ function Component.Add(Client)
 	local Signal = Knit.GetService("Signal")
 
 	local Clone = Utilities.CloneInstance(Container.Object, {
-		Visible = Keywords.On,
+		Visible = true,
 		Parent = Holder,
 	})
 

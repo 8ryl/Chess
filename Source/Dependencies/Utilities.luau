@@ -42,7 +42,7 @@ end
 -- Converts a boolean value into a corresponding "bit" (On/Off) value.
 
 function Utilities.ConvertBooleanAsBits(Boolean, Bits)
-	return Boolean and Bits.On or Bits.Off
+	return Boolean and Bits[1] or Bits[2]
 end
 
 -- Creates a new Roblox instance with the given class name and sets its properties.

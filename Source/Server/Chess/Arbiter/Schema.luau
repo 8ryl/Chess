@@ -1,5 +1,5 @@
 --[[
-    Global state container for all active chess matches.
+    Global state container for active chess matches.
 
     Each entry within `Matches` represents a unique match instance.
 

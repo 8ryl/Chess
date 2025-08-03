@@ -16,7 +16,6 @@ local Configuration = require(Dependencies.Configuration)
 local Utilities = require(Dependencies.Utilities)
 
 local Cooldown = Configuration.Cooldown
-local Keywords = Configuration.Keywords
 
 local Service = Knit.CreateService({
 	Name = "Database",
@@ -62,7 +61,7 @@ end
 -- Removes the player's profile from memory upon disconnection.
 
 function Service:Remove(User: Player)
-	Service.Profiles[User] = Keywords.Null
+	Service.Profiles[User] = nil
 end
 
 --[[

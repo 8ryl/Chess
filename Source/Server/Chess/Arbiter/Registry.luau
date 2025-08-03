@@ -17,9 +17,6 @@ local Resources = require(Dependencies.Resources)
 
 local Configuration = require(Dependencies.Configuration)
 
-local Cooldown = Configuration.Cooldown
-local Keywords = Configuration.Keywords
-
 local Service = Knit.CreateService({
 	Name = "Registry",
 
@@ -31,7 +28,7 @@ local Service = Knit.CreateService({
 		__index = function(self, Identifier)
 			local State = rawget(self, Identifier)
 
-			if State ~= Keywords.Null then
+			if State ~= nil then
 				return State
 			end
 
@@ -101,8 +98,8 @@ function Client:CheckAvailability(Contender, Piece, Square)
 
 		-- Animates the Object's Transparency Instance.
 
-		Utilities.Animate(Object, Configuration.Movement.Animation, {
-			Transparency = Keywords.One,
+		Utilities.Animate(Object, Configuration.Movement, {
+			Transparency = 1,
 		}):Play()
 
 		-- Remove the existing piece instance from the board entirely
@@ -123,16 +120,16 @@ function Client:CheckAvailability(Contender, Piece, Square)
 	-- Makes sure to set the "HasMoved" attribute as on
 
 	if not Piece:GetAttribute("HasMoved") then
-		Piece:SetAttribute("HasMoved", Keywords.On)
+		Piece:SetAttribute("HasMoved", true)
 	end
 
 	local Scale, Offset = Coordinates.Scale, Coordinates.Offset
 
-	Content.Storage[Scale][Offset] = Keywords.Null
+	Content.Storage[Scale][Offset] = nil
 
 	-- Update the piece's position in the 3D world to reflect the new board state
 
-	Utilities.Animate(Piece, Configuration.Movement.Animation, {
+	Utilities.Animate(Piece, Configuration.Movement, {
 		Position = Resources.GetSquareVector(Square, Chessboard).Position + Vector3.yAxis * (Piece.Size.Y / 2),
 	}):Play()
 
@@ -171,7 +168,7 @@ function Client:Rook(Contender, Piece)
 		-- Step through a maximum of 7 tiles in that direction (standard chessboard)
 
 		for Name, Offset in Direction do
-			for Step = Keywords.One, 7, Keywords.One do
+			for Step = 1, 7, 1 do
 				local X = Rows + Offset.X * Step
 				local Y = Column + Offset.Y * Step
 
@@ -203,7 +200,7 @@ end
 
 -- Computes the available path for a pawn piece based on its coordinates and attributes
 
-function Client:Pawn(Client, Piece)
+function Client:Pawn(Contender, Piece)
 	local Coordinates = Piece:GetAttribute("Coordinates")
 
 	local Colour = Piece:GetAttribute("Colour")
@@ -263,7 +260,7 @@ end
 
 -- Computes the available path for a pawn piece based on its coordinates and attributes
 
-function Client:Bishop(Client, Piece)
+function Client:Bishop(Contender, Piece)
 	local Route = Utilities.CloneDictionary(Schema.Trajectory)
 
 	local Colour = Piece:GetAttribute("Colour")
@@ -288,7 +285,7 @@ function Client:Bishop(Client, Piece)
 
 	for Name, Direction in Offsets do
 		for Path, Offset in Direction do
-			for Step = Keywords.One, 7, Keywords.One do
+			for Step = 1, 7, 1 do
 				local X = Offset.X * Step
 				local Y = Offset.Y * Step
 
@@ -324,7 +321,7 @@ end
 
 -- Computes the available path for a Knight piece based on its coordinates and attributes
 
-function Client:Knight(Client, Piece)
+function Client:Knight(Contender, Piece)
 	local Route = Utilities.CloneDictionary(Schema.Trajectory)
 
 	local Colour = Piece:GetAttribute("Colour")
@@ -388,7 +385,7 @@ end
 
 -- Computes the available path for a pawn piece based on its coordinates and attributes
 
-function Client:Queen(Client, Piece)
+function Client:Queen(Contender, Piece)
 	local Route = Utilities.CloneDictionary(Schema.Trajectory)
 
 	local Colour = Piece:GetAttribute("Colour")
@@ -423,7 +420,7 @@ function Client:Queen(Client, Piece)
 
 	for Name, Direction in Offsets do
 		for Path, Offset in Direction do
-			for Step = Keywords.One, 7, Keywords.One do
+			for Step = 1, 7, 1 do
 				local X = Offset.X * Step
 				local Y = Offset.Y * Step
 
@@ -461,7 +458,7 @@ end
 
 -- Computes the available path for a pawn piece based on its coordinates and attributes
 
-function Client:King(Client, Piece)
+function Client:King(Contender, Piece)
 	local Route = Utilities.CloneDictionary(Schema.Trajectory)
 
 	local Coordinates = Piece:GetAttribute("Coordinates")
@@ -569,7 +566,5 @@ function Service.Filter(Trajectory, Chessboard)
 
 	return Filter
 end
-
--- I have no idea what the heck I'm doing, but it seems to be working so... can't really complain!
 
 return Service

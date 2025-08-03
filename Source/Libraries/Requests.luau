@@ -12,7 +12,6 @@ local Knit = require(Packages.Knit)
 
 local Promise = require(Packages.Promise)
 
-local Keywords = Configuration.Keywords
 local Cooldown = Configuration.Cooldown
 
 local PlayerGui = Utilities.GetDisplayAsync()
@@ -29,7 +28,7 @@ local Ignore = Popup:FindFirstChild("Ignore")
 local Thumbnail = Popup:FindFirstChild("Thumbnail")
 local Label = Popup:FindFirstChild("Label")
 
-local Settings = Configuration.Request
+local Preferences = Configuration.Request
 
 local Component = Knit.CreateController({
 	Name = "Requests",
@@ -37,13 +36,9 @@ local Component = Knit.CreateController({
 
 local Requests = Queue.new()
 
---[[
-	Handles incoming challenge requests by adding them to the queue.
+-- Handles incoming challenge requests by adding them to the queue.
 
-	When enqueuing, it also triggers the display immediately via callback.
-]]
-
-local Signal, OngoingSessions = Keywords.Null, {}
+local Signal, OngoingSessions = nil, {}
 
 function Component.Process(Opponent)
 	Requests:Enqueue(Opponent, function()
@@ -51,36 +46,29 @@ function Component.Process(Opponent)
 	end)
 end
 
---[[
-	Displays the challenge request to the client.
-
-	Resets the popup by smoothly hiding it with an animation.
-	Once the animation finishes and after a short delay, the popup is set to be invisible.
-]]
+-- Remove the session from the active sessions table to clean up
 
 function Component.Reset(myIndex)
-	-- Remove the session from the active sessions table to clean up
-
 	table.remove(OngoingSessions, myIndex)
 
 	return Promise.new(function()
-		Animation:Create(Popup, Settings.Animation, {
-			GroupTransparency = Keywords.One, -- Fully transparent
+		Animation:Create(Popup, Preferences, {
+			GroupTransparency = 1, -- Fully transparent
 		}):Play()
 
 		-- Wait for the specified delay before fully hiding the popup
 
-		task.wait(Settings.Delay)
+		task.wait(Preferences.DelayTime)
 
 		-- Hide the popup
 
-		Popup.Visible = Keywords.Off
+		Popup.Visible = false
 	end)
 end
 
-function Component.Display(Opponent)
-	-- Adds the value to OngoingSessions array to prevent re-entry or duplication
+-- Displays the challenge request to the client.
 
+function Component.Display(Opponent)
 	table.insert(OngoingSessions, Opponent)
 
 	-- Store the index of the opponent in the session list for later removal
@@ -122,12 +110,12 @@ function Component.Display(Opponent)
 		return Component.Reset(myIndex)
 	end)
 
-	Popup.Visible = Keywords.On
+	Popup.Visible = true
 
 	-- Animates the popup's GroupTransparency property
 
-	Animation:Create(Popup, Settings.Animation, {
-		GroupTransparency = Keywords.Zero,
+	Animation:Create(Popup, Preferences, {
+		GroupTransparency = 0,
 	}):Play()
 
 	-- Simulate user interaction delay or cooldown
@@ -151,11 +139,7 @@ function Component.Display(Opponent)
 	end)
 end
 
---[[
-	Skips the current request and processes the next one in the queue.
-
-	@param Opponent - The opponent associated with the current request.
-]]
+-- Skips the current request and processes the next one in the queue.
 
 function Component.Skip(Opponent)
 	if Requests:IsEmpty() then

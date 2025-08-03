@@ -38,7 +38,7 @@ end
 -- Checks whether a given coordinate is within bounds (i.e. exists on the board)
 
 function Resources.SquareInBounds(Coordinates, Chessboard)
-	return Resources:Convert(Coordinates, Chessboard) ~= Keywords.Null
+	return Resources:Convert(Coordinates, Chessboard) ~= nil
 end
 
 -- Returns the stored piece coordinates from the match's data.
@@ -59,6 +59,8 @@ function Resources.Switch(Switching, Actor)
 	return Switching[Actor]
 end
 
+-- Returns a move history for piece captures stating that the piece has been captured.
+
 function Resources.Capture(Piece)
 	local Coordinates = Piece:GetAttribute("Coordinates")
 
@@ -73,6 +75,8 @@ function Resources.Capture(Piece)
 		Identifier = Piece:GetAttribute("Identifier"),
 	}
 end
+
+-- Returns a move history template which could then later be used for PGN exportation, etc.
 
 function Resources.Record(Piece, Square)
 	local Row, Column = Resources.Unpack(Square)
@@ -89,7 +93,7 @@ function Resources.Record(Piece, Square)
 
 		Timestamp = tick(),
 
-		Capture = Keywords.Null,
+		Capture = nil,
 
 		Identifier = Piece:GetAttribute("Identifier"),
 	}

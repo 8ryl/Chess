@@ -32,7 +32,6 @@ local Service = Knit.CreateService({
 
 local Client = Service.Client
 local Matches = Schema.Matches
-local Keywords = Configuration.Keywords
 
 -- Generates a new chessboard model and places it in the match environment
 
@@ -131,7 +130,7 @@ function Service:Resign(Identifier, Winner: "Black" | "White")
 
 	-- Increases the player’s stored currency value for winning the match
 
-	Data.Board[Schema.Currency] += Keywords.One
+	Data.Board[Schema.Currency] += 1
 
 	-- Sends a disconnect signal to both players to end the session
 

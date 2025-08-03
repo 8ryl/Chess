@@ -11,7 +11,7 @@ local Knit = require(Packages.Knit)
 local PlayerGui = Utilities.GetDisplayAsync()
 local Client = Utilities.GetClientAsync()
 
-local Keywords = Configuration.Keywords
+local Preferences = Configuration.Hover
 
 local Component = Knit.CreateController({
 	Name = "Hover",
@@ -26,12 +26,12 @@ function Component:Init(Button: GuiButton)
 
 	-- Load hovering animation settings and cache the button's original size
 
-	local Settings, Cache = Configuration.Hovering, Button.Size
+	local Settings, Cache = Configuration.Settings, Button.Size
 
 	-- Slightly increases the button’s size for a smooth hover effect.
 
 	MouseEnter:Connect(function()
-		Utilities.Animate(Button, Settings.Animation(Keywords.Off, Keywords.Zero), {
+		Utilities.Animate(Button, Preferences(0, false), {
 			Size = UDim2.fromScale(Cache.X.Scale + Settings.Size, Cache.Y.Scale + Settings.Size),
 		}):Play()
 	end)
@@ -39,7 +39,7 @@ function Component:Init(Button: GuiButton)
 	-- Smoothly restores the button to its original size.
 
 	MouseLeave:Connect(function()
-		Utilities.Animate(Button, Settings.Animation(Keywords.Off, Keywords.Zero), {
+		Utilities.Animate(Button, Preferences(0, false), {
 			Size = UDim2.fromScale(Cache.X.Scale, Cache.Y.Scale),
 		}):Play()
 	end)
@@ -47,7 +47,7 @@ function Component:Init(Button: GuiButton)
 	-- Button briefly shrinks slightly to simulate a "pressed" effect.
 
 	Button.Activated:Connect(function()
-		Utilities.Animate(Button, Settings.Animation(Keywords.On, Keywords.Zero), {
+		Utilities.Animate(Button, Preferences(0, true), {
 			Size = UDim2.fromScale(Cache.X.Scale - (Settings.Size / 2), Cache.Y.Scale - (Settings.Size / 2)),
 		}):Play()
 	end)

@@ -5,8 +5,6 @@ local Packages = Storage.Packages
 
 local Configuration = require(Dependencies.Configuration)
 
-local Keywords = Configuration.Keywords
-
 -- Sorry, my ADHD got the best of me. I've went insane
 
 return {
@@ -15,12 +13,12 @@ return {
 	},
 
 	Metadata = {
-		Wins = Keywords.Zero,
-		Losses = Keywords.Zero,
+		Wins = 0,
+		Losses = 0,
 
-		Level = Keywords.One,
+		Level = 1,
 
-		Playtime = Keywords.Zero, -- Probably in minutes
-		NumberOfGamesPlayed = Keywords.Zero,
+		Playtime = 0, -- Probably in minutes
+		NumberOfGamesPlayed = 0,
 	},
 }

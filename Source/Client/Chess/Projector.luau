@@ -9,7 +9,6 @@ local Knit = require(Packages.Knit)
 local Utilities = require(Dependencies.Utilities)
 local Configuration = require(Dependencies.Configuration)
 
-local Keywords = Configuration.Keywords
 local Preferences = Configuration.Highlight
 
 local Camera = Utilities.GetCameraAsync()
@@ -21,7 +20,7 @@ local Component = Knit.CreateController({
 	Objects = {},
 })
 
-Component.Piece = Keywords.Null
+Component.Piece = nil
 
 -- Highlights valid movement squares based on the given trajectory
 
@@ -35,7 +34,7 @@ function Component:Project(Trajectory, Piece, Chessboard)
 	-- Clears existing highlights when any are currently active
 
 	if Utilities.isNotEmpty(Component.Objects) then
-		Component:Disconnect(Keywords.Off)
+		Component:Disconnect(false)
 	end
 
 	for Name, Direction in Trajectory do -- Loop sthrough each direction in the trajectory
@@ -56,7 +55,7 @@ function Component:Project(Trajectory, Piece, Chessboard)
 
 			-- Animates the highlight to add some luxurious effect to the game.
 
-			Utilities.Animate(Highlight, Preferences.Animation, {
+			Utilities.Animate(Highlight, Preferences, {
 				FillColor = BrickColor.Blue().Color, -- Modify this to add customization
 			}):Play()
 
@@ -105,7 +104,7 @@ function Component:Disconnect(ThenRevertCamera)
 		Camera.CameraType = Enum.CameraType.Custom
 	end
 
-	Component.Connection = Keywords.Null
+	Component.Connection = nil
 
 	for Name, Object in Component.Objects do -- Loops through the stored highlights
 		Object:Destroy() -- Removes the highlight from the board
@@ -119,15 +118,15 @@ function Component:KnitStart()
 	local Registry = Knit.GetService("Registry")
 
 	Registry.Disconnect:Connect(function()
-		return Component:Disconnect(Keywords.Off)
+		return Component:Disconnect(false)
 	end)
 
 	Initialization.Draw:Connect(function()
-		return Component:Disconnect(Keywords.On)
+		return Component:Disconnect(true)
 	end)
 
 	Initialization.Resignation:Connect(function()
-		return Component:Disconnect(Keywords.On)
+		return Component:Disconnect(true)
 	end)
 end
 
