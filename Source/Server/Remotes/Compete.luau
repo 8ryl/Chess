@@ -1,15 +1,16 @@
-local Server = game:GetService("ServerScriptService")
 local HttpService = game:GetService("HttpService")
 local Storage = game:GetService("ReplicatedStorage")
 local Contenders = game:GetService("Players")
 
-local Directory = Server.Storage
 local Packages = Storage.Packages
 local Dependencies = Storage.Dependencies
 
+local Parameters = Dependencies.Parameters
+
 local Knit = require(Packages.Knit)
-local Settings = require(Dependencies.Settings)
-local Configuration = require(Dependencies.Configuration)
+
+local Settings = require(Parameters.Settings)
+local Configuration = require(Parameters.Configuration)
 
 local Cooldown = Configuration.Cooldown
 

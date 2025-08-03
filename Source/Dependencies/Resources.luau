@@ -7,8 +7,10 @@ local Chess = Directory.Chess
 
 local Arbiter = Chess.Arbiter
 
+local Parameters = Dependencies.Parameters
+
 local Schema = require(Arbiter.Schema)
-local Config = require(Dependencies.Configuration)
+local Config = require(Parameters.Configuration)
 
 local Keywords = Config.Keywords
 

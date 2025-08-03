@@ -3,11 +3,13 @@ local Storage = game:GetService("ReplicatedStorage")
 local Packages = Storage.Packages
 local Dependencies = Storage.Dependencies
 
+local Parameters = Dependencies.Parameters
+
 local Knit = require(Packages.Knit)
 
-local Settings = require(Dependencies.Settings)
+local Settings = require(Parameters.Settings)
 local Utilities = require(Dependencies.Utilities)
-local Configuration = require(Dependencies.Configuration)
+local Configuration = require(Parameters.Configuration)
 
 local Preferences = Settings.Camera
 

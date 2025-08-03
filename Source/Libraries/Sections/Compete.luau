@@ -4,8 +4,11 @@ local Contenders = game:GetService("Players")
 local Packages = Storage:WaitForChild("Packages")
 local Dependencies = Storage:WaitForChild("Dependencies")
 
-local Configuration = require(Dependencies.Configuration)
+local Parameters = Dependencies:WaitForChild("Parameters")
+
+local Configuration = require(Parameters.Configuration)
 local Utilities = require(Dependencies.Utilities)
+
 local Knit = require(Packages.Knit)
 
 local PlayerGui = Utilities.GetDisplayAsync()

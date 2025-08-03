@@ -3,7 +3,9 @@ local Storage = game:GetService("ReplicatedStorage")
 local Dependencies = Storage.Dependencies
 local Packages = Storage.Packages
 
-local Configuration = require(Dependencies.Configuration)
+local Parameters = Dependencies.Parameters
+
+local Configuration = require(Parameters.Configuration)
 
 -- Sorry, my ADHD got the best of me. I've went insane
 

@@ -5,8 +5,11 @@ local Server = game:GetService("Players")
 local Packages = Storage:WaitForChild("Packages")
 local Dependencies = Storage:WaitForChild("Dependencies")
 
-local Configuration = require(Dependencies.Configuration)
+local Parameters = Dependencies:WaitForChild("Parameters")
+
+local Configuration = require(Parameters.Configuration)
 local Utilities = require(Dependencies.Utilities)
+
 local Queue = require(Dependencies.Queue)
 local Knit = require(Packages.Knit)
 

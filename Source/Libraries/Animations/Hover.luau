@@ -3,8 +3,11 @@ local Storage = game:GetService("ReplicatedStorage")
 local Packages = Storage:WaitForChild("Packages")
 local Dependencies = Storage:WaitForChild("Dependencies")
 
+local Parameters = Dependencies:WaitForChild("Parameters")
+
 local MouseOver = require(Dependencies.Client.MouseOverModule)
-local Configuration = require(Dependencies.Configuration)
+local Configuration = require(Parameters.Configuration)
+
 local Utilities = require(Dependencies.Utilities)
 local Knit = require(Packages.Knit)
 

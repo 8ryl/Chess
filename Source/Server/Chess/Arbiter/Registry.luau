@@ -8,6 +8,8 @@ local Arbiter = Chess.Arbiter
 local Dependencies = Storage.Dependencies
 local Packages = Storage.Packages
 
+local Parameters = Dependencies.Parameters
+
 local Knit = require(Packages.Knit)
 
 local Schema = require(Arbiter.Schema)
@@ -15,7 +17,7 @@ local Schema = require(Arbiter.Schema)
 local Utilities = require(Dependencies.Utilities)
 local Resources = require(Dependencies.Resources)
 
-local Configuration = require(Dependencies.Configuration)
+local Configuration = require(Parameters.Configuration)
 
 local Service = Knit.CreateService({
 	Name = "Registry",

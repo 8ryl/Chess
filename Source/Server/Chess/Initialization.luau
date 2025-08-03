@@ -7,15 +7,19 @@ local Packages = Storage.Packages
 local Directory = Server.Storage
 local Chess = Directory.Chess
 
+local Parameters = Dependencies.Parameters
+
 local Arbiter = Chess.Arbiter
 
 local Chessboard = Assets.Chessboard
 
 local Knit = require(Packages.Knit)
+
 local Schema = require(Arbiter.Schema)
-local Settings = require(Dependencies.Settings)
+local Settings = require(Parameters.Settings)
+
 local Utilities = require(Dependencies.Utilities)
-local Configuration = require(Dependencies.Configuration)
+local Configuration = require(Parameters.Configuration)
 
 -- Knit service for creating, positioning, and managing chessboards during match sessions
 local Service = Knit.CreateService({

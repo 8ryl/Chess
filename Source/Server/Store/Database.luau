@@ -5,14 +5,17 @@ local Contenders = game:GetService("Players")
 local Dependencies = Storage.Dependencies
 local Packages = Storage.Packages
 
+local Parameters = Dependencies.Parameters
+
 local Directory = Server.Storage
 local Store = Directory.Store
 
 local Knit = require(Packages.Knit)
+
 local Template = require(Store.Template)
 local ProfileStore = require(Packages.Store)
 
-local Configuration = require(Dependencies.Configuration)
+local Configuration = require(Parameters.Configuration)
 local Utilities = require(Dependencies.Utilities)
 
 local Cooldown = Configuration.Cooldown

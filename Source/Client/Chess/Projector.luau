@@ -4,15 +4,17 @@ local UserInput = game:GetService("UserInputService")
 local Packages = Storage.Packages
 local Dependencies = Storage.Dependencies
 
+local Parameters = Dependencies.Parameters
+
 local Knit = require(Packages.Knit)
 
 local Utilities = require(Dependencies.Utilities)
-local Configuration = require(Dependencies.Configuration)
-
-local Preferences = Configuration.Highlight
+local Configuration = require(Parameters.Configuration)
 
 local Camera = Utilities.GetCameraAsync()
 local Mouse = Utilities.GetMouseAsync()
+
+local Preferences = Configuration.Highlight
 
 local Component = Knit.CreateController({
 	Name = "Projector",
