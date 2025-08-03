@@ -59,6 +59,21 @@ function Resources.Switch(Switching, Actor)
 	return Switching[Actor]
 end
 
+function Resources.Capture(Piece)
+	local Coordinates = Piece:GetAttribute("Coordinates")
+
+	local X, Y = Coordinates.Scale, Coordinates.Offset
+
+	return {
+		Piece = Piece:GetAttribute("Piece"),
+		Colour = Piece:GetAttribute("Colour"),
+
+		From = UDim.new(X, Y),
+
+		Identifier = Piece:GetAttribute("Identifier"),
+	}
+end
+
 function Resources.Record(Piece, Square)
 	local Row, Column = Resources.Unpack(Square)
 	local Coordinates = Piece:GetAttribute("Coordinates")
