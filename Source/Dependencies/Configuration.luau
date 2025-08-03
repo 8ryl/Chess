@@ -1,115 +1,137 @@
---[[
-	This module defines common constants, delays, animation settings, and interface-related parameters.
-	It centralizes every tweakable value for easy adjustments across the game.
+local Configuration = {}
 
-	Developer Note: Modify the values at your own risk, might cause some problems!
+--[[
+	Defines every constant such as:, delays, animation properties, and interface behavior parameters.
+
+	This file centralizes every tweakable value to maintain consistency across the game.
+	Direct edits alter the timing, styling, and visual responses of interface elements.
 ]]
 
-local Configuration = {
-	-- Delay presets (in seconds) for various animations
+-- Time intervals (in seconds) for internal processes and visual transitions
 
-	Delay = {
-		Tick = 0.065, -- Very fast
-		Fast = 0.125, -- Fast delay
-		Semi = 0.175, -- Slight delay
-		Medium = 0.375, -- Moderate delay
-		Long = 0.875, -- Long delay
-	},
+Configuration.Delay = {
+	Tick = 0.065, -- Minimum frame-level delay for rapid updates
+	Fast = 0.125, -- Optimized delay for fast visual transitions
+	Semi = 0.175, -- Balanced delay for moderate transitions
+	Medium = 0.375, -- Standard delay for noticeable animations
+	Long = 0.875, -- Extended delay for slow visual emphasis
 }
 
--- Cooldown durations (in seconds) for certain actions or systems
+-- Preset cooldown durations (in seconds) for gameplay systems and user actions
 
 Configuration.Cooldown = {
-	Small = 2.5,
-	Medium = 5,
-	Long = 10,
+	Small = 2.5, -- Short duration for minor system resets
+	Medium = 5, -- Standard duration for general actions
+	Long = 10, -- Extended duration for critical systems
 }
 
--- Default constants for common logic and interface usage
+-- Base constants representing numerical and logical defaults
 
-Configuration.Default = {
-	Zero = math.round(0.25), -- Rounded value often used for transparency
-	One = math.round(1.25), -- Rounded value often used for full or near-full opacity
+Configuration.Keywords = {
+	Zero = math.round(0.25), -- Rounded baseline transparency or scale factor
+	One = math.round(1.25), -- Rounded maximum opacity or size factor
 
-	On = true, -- Boolean 'On' state
-	Off = false, -- Boolean 'Off' state
-	Null = nil, -- Represents a null state
+	On = true, -- Logical true state
+	Off = false, -- Logical false state
+	Null = nil, -- Null state reference
 }
 
-local Default = Configuration.Default
+local Keywords = Configuration.Keywords
+local Delay = Configuration.Delay
 
--- Settings specific to challenge requests
+-- Configuration block for challenge request prompts and associated animations
 
 Configuration.Request = {
-	Delay = Configuration.Delay.Medium, -- How long the animation lasts
+	Delay = Delay.Medium, -- Duration of challenge prompt transition
 
-	Style = Enum.EasingStyle.Quad, -- Easing style for animation
-	Direction = Enum.EasingDirection.Out, -- Easing direction for animation
+	Style = Enum.EasingStyle.Quad, -- Easing style for request animation
+	Direction = Enum.EasingDirection.Out, -- Easing direction for request animation
 }
 
--- Settings for panel popup interfaces (do not modify the Blur/Shadow/Panel values!
+-- Parameters for popup panels including visual depth, shadows, and opacity adjustments
 
 Configuration.Popup = {
-	Delay = Configuration.Delay.Semi, -- Animation duration for popups
+	Delay = Delay.Semi, -- Duration of popup entry and exit
 
-	Style = Enum.EasingStyle.Sine, -- Easing style for smooth animations
-	Direction = Enum.EasingDirection.Out, -- Easing direction
+	Style = Enum.EasingStyle.Sine, -- Easing style for smooth popup motion
+	Direction = Enum.EasingDirection.Out, -- Easing direction for popup motion
 
-	Blur = { On = 15, Off = 2.5 },
-	Shadow = { On = 0.45, Off = Default.One },
-	Panel = { On = Default.Zero, Off = Default.One },
+	Blur = { On = 15, Off = 2.5 }, -- Screen blur levels during popup states
+	Shadow = { On = 0.45, Off = Keywords.One }, -- Shadow intensity levels during transitions
+	Panel = { On = Keywords.Zero, Off = Keywords.One }, -- Panel opacity control values
 }
+
+-- Parameters for piece selection highlights
 
 Configuration.Highlight = {
-	Delay = Configuration.Delay.Fast, -- Duration of highlight animation
+	Delay = Delay.Fast, -- Duration of highlight effect
 
-	Style = Enum.EasingStyle.Sine, -- Easing style for highlight
-	Direction = Enum.EasingDirection.Out, -- Easing direction for highlight
+	Style = Enum.EasingStyle.Sine, -- Easing style for highlight transition
+	Direction = Enum.EasingDirection.Out, -- Easing direction for highlight transition
 }
 
--- Represents the piece movement
+-- Parameters for chess piece movement animations
 
 Configuration.Movement = {
-	Delay = Configuration.Delay.Fast, -- Duration of highlight animation
+	Delay = Delay.Fast, -- Duration of piece translation
 
-	Style = Enum.EasingStyle.Sine, -- Easing style for highlight
-	Direction = Enum.EasingDirection.Out, -- Easing direction for highlight
+	Style = Enum.EasingStyle.Sine, -- Easing style for movement
+	Direction = Enum.EasingDirection.Out, -- Easing direction for movement
 }
+
+-- Parameters for hover-based scale effects
 
 Configuration.Hovering = {
-	Delay = Configuration.Delay.Semi, -- Duration of hover animation
+	Size = 0.035, -- Scale increment as a decimal (3.5%)
 
-	Style = Enum.EasingStyle.Sine, -- Easing style for hover
-	Direction = Enum.EasingDirection.Out, -- Easing direction for hover
+	Delay = Delay.Fast, -- Duration of hover scaling
+
+	Style = Enum.EasingStyle.Sine, -- Easing style for hover scaling
+	Direction = Enum.EasingDirection.Out, -- Easing direction for hover scaling
 }
 
-Configuration.Hovering.Size = 2.5 / 100 -- Scale change percentage for hover effect (5% larger)
+Configuration.Loading = {
+	Size = 0.075,
 
-local Request = Configuration.Request
-local Highlight = Configuration.Highlight
-local Popup = Configuration.Popup
-local Movement = Configuration.Movement
-local Hovering = Configuration.Hovering
+	Delay = Delay.Long, -- Duration of hover scaling
 
--- Pre-built TweenInfo Animations
+	Style = Enum.EasingStyle.Quint, -- Easing style for hover scaling
+	Direction = Enum.EasingDirection.Out, -- Easing direction for hover scaling
+}
 
-Request.Animation = TweenInfo.new(Request.Delay, Request.Style, Request.Direction)
+-- Predefined TweenInfo instances for animations used in multiple components
 
-Highlight.Animation = TweenInfo.new(Highlight.Delay, Highlight.Style, Highlight.Direction)
+Configuration.Request.Animation =
+	TweenInfo.new(Configuration.Request.Delay, Configuration.Request.Style, Configuration.Request.Direction)
 
-Movement.Animation = TweenInfo.new(Movement.Delay, Movement.Style, Movement.Direction)
-
-Popup.Animation = TweenInfo.new(Popup.Delay, Popup.Style, Popup.Direction)
-
--- Function returning TweenInfo for hover animations (reversible with optional repeat count)
-Hovering.Animation = function(Count, Reversable)
+Configuration.Loading.Animation = function(Count, Reverses)
 	return TweenInfo.new(
-		Hovering.Delay,
-		Hovering.Style,
-		Hovering.Direction,
+		Configuration.Hovering.Delay,
+		Configuration.Hovering.Style,
+		Configuration.Hovering.Direction,
+		Count or Keywords.Zero,
+		Reverses or Keywords.Off
+	)
+end
 
-		Reversable or Default.Zero, -- Number of repeats (default zero)
-		Count or Default.Off -- Whether the animation reverses (default false)
+Configuration.Highlight.Animation =
+	TweenInfo.new(Configuration.Highlight.Delay, Configuration.Highlight.Style, Configuration.Highlight.Direction)
+
+Configuration.Movement.Animation =
+	TweenInfo.new(Configuration.Movement.Delay, Configuration.Movement.Style, Configuration.Movement.Direction)
+
+Configuration.Popup.Animation =
+	TweenInfo.new(Configuration.Popup.Delay, Configuration.Popup.Style, Configuration.Popup.Direction)
+
+-- Dynamic TweenInfo generator for hover animations with adjustable repeat and reverse properties
+
+Configuration.Hovering.Animation = function(Count, Reverses)
+	return TweenInfo.new(
+		Configuration.Hovering.Delay,
+		Configuration.Hovering.Style,
+		Configuration.Hovering.Direction,
+		Reverses or Keywords.Zero,
+		Count or Keywords.Off
 	)
 end
 

@@ -11,7 +11,7 @@ local Knit = require(Packages.Knit)
 local Settings = require(Dependencies.Settings)
 local Configuration = require(Dependencies.Configuration)
 
-local Default = Configuration.Default
+local Keywords = Configuration.Keywords
 local Cooldown = Configuration.Cooldown
 
 local Service = Knit.CreateService({
@@ -35,7 +35,7 @@ function Service.Reject(Client, Opponent)
 	if Challenges[Client][Opponent] then
 		-- Remove the challenge against the specific opponent from the client's list
 
-		Challenges[Client][Opponent] = Default.Null
+		Challenges[Client][Opponent] = Keywords.Null
 	end
 end
 
@@ -69,7 +69,7 @@ end
 	Handles accepting a challenge from a client to an opponent.
 
 	- Initializes the chessboard for both players
-  		and starts the match using default settings (e.g., Rapid mode).
+		and starts the match using Keywords settings (e.g., Rapid mode).
 	- After deploying, it clears the challenge.
 ]]
 
@@ -79,33 +79,38 @@ function Service.Accept(Client, Opponent, Name)
 	local Template = {
 		Competitors = {
 			Black = { -- Contains metadata for the black-side player
-				User = Client, -- Reference to the player instance controlling black
+				Colour = "Black",
+				Contender = Client, -- Reference to the player instance controlling black
+
 				Time = Settings.Modes[Name].Time, -- Assigned time control for black, based on selected mode
 			},
 
 			White = { -- Contains metadata for the white-side player
-				User = Opponent, -- Reference to the player instance controlling white
-				Time = Settings.Modes[Name].Time, -- Assigned time control for white, based on selected mode
+				Colour = "White",
+				Contender = Opponent, -- Reference to the player instance controlling white
 
+				Time = Settings.Modes[Name].Time, -- Assigned time control for white, based on selected mode
 				-- Placeholder for custom square highlighting or additional attributes
 			},
+		},
+
+		Switching = {
+			[Opponent] = Client,
+			[Client] = Opponent,
 		},
 
 		History = {}, -- Records and stores every piece movement in the board.
 		Storage = {}, -- Stores the board cell the piece currently resides in
 
-		-- ^ This dictionary is used to track the position of pieces on the board.
-		-- It follows the structure: Storage[Colour][Row][Column] = piece
+		Actor = Opponent, -- Assigns White as the initial value for the turn state variable
 
-		Mode = Settings.Modes[Name] or Settings.Modes.Default, -- Game mode, can be modified later.
-
-		Identifier = HttpService:GenerateGUID(Configuration.Default.Off),
+		Mode = Settings.Modes[Name] or Settings.Modes.Keywords, -- Game mode, can be modified later.
 	}
 
 	if Challenges[Opponent] then
 		-- Deploy the chessboard with the two players.
 
-		Initialization:Deploy(Template)
+		Initialization:Deploy(HttpService:GenerateGUID(Configuration.Keywords.Off), Template)
 	end
 
 	-- Clear the challenge after accepting.
@@ -133,16 +138,19 @@ end
 
 function Service:KnitInit()
 	-- Initialize challenges list for all currently connected players at server start
+
 	for Name, Client in Contenders:GetPlayers() do
 		Service.Add(Client)
 	end
 
 	-- Handle incoming challenge requests from clients
+
 	Signals.Request:Connect(function(Client, Opponent)
 		return Service.Request(Client, Opponent)
 	end)
 
 	-- Handle challenge acceptances from clients
+
 	Signals.Accept:Connect(function(Client, Opponent, Name)
 		-- TODO: Prevent the client from initiating more than two concurrent games
 
@@ -150,9 +158,11 @@ function Service:KnitInit()
 	end)
 
 	-- Automatically set up challenges list for players who join later
+
 	Contenders.PlayerAdded:Connect(Service.Add)
 
 	-- Handle challenge rejections from clients
+
 	Signals.Deny:Connect(Service.Reject)
 end
 

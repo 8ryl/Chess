@@ -18,31 +18,31 @@ local Sections = Interface:WaitForChild("Sections")
 local Container = Interface:WaitForChild("Container")
 
 local Settings = Configuration.Popup
-local Default = Configuration.Default
+local Keywords = Configuration.Keywords
 
 local Component = Knit.CreateController({
 	Name = "Popup",
 })
 
--- Stores whether the popup panel is currently shown or hidden (true/false).
+-- Represents the current popup visibility state as a Boolean flag.
 
-Component.State = Default.Off
+Component.State = Keywords.Off
 
---[[
-	Toggles (Displays/Hides) the panel with animations.
+-- Resets every panel in Sections to a defined visibility state.
 
-	@param Panel (CanvasGroup) - The UI panel to animate.
-	@param Input - The user input that triggered the toggle (not used here).
+function Component:Reset(Switch)
+	for Name, Panel in Sections:GetChildren() do
+		if not Panel:IsA("CanvasGroup") then
+			continue
+		end
 
-	This function also animates:
-	- Blur effect in Lighting
-	- Shadow overlay transparency
-	- Panel's group transparency
+		-- Delegates the visibility and animation control of each panel to Component.Switch.
 
-	After toggling, it flips Component.State to its opposite value.
-]]
+		Component.Switch(Panel, Switch or Keywords.Off)
+	end
+end
 
--- Class 'Panel' should always be of type 'CanvasGroup'
+-- Animates a specified panel and related visual effects based on a Boolean state.
 
 function Component.Switch(Panel, Switch)
 	local States = {
@@ -54,27 +54,30 @@ function Component.Switch(Panel, Switch)
 	local Blur = Lighting:FindFirstChildOfClass("BlurEffect")
 	local Shadow = Interface:WaitForChild("Shadow")
 
-	Animation:Create(Blur, Settings.Animation, {
+	-- Tweens the blur effect size to the target value.
+
+	Utilities.Animate(Blur, Settings.Animation, {
 		Size = States.Blur,
 	}):Play()
 
-	Animation:Create(Shadow, Settings.Animation, {
+	-- Tweens the shadow overlay transparency to the target value.
+
+	Utilities.Animate(Shadow, Settings.Animation, {
 		BackgroundTransparency = States.Shadow,
 	}):Play()
 
-	Animation:Create(Panel, Settings.Animation, {
+	-- Tweens the panel transparency to the target value.
+
+	Utilities.Animate(Panel, Settings.Animation, {
 		GroupTransparency = States.Panel,
 	}):Play()
+
+	-- Applies the final visibility state to the panel.
 
 	Panel.Visible = Switch
 end
 
---[[
-	Initializes the Popup controller when Knit starts.
-
-	Connects every button inside the Container to their matching panel in the Sections folder.
-	When a button is clicked, it toggles the corresponding panel with animation.
-]]
+-- Initializes the Popup controller and binds buttons to their respective panels.
 
 function Component:KnitStart()
 	for Name, Button in Container:GetChildren() do
@@ -87,11 +90,17 @@ function Component:KnitStart()
 		end
 
 		Button.Activated:Connect(function(Input)
+			-- Resets all panels to the Keywords hidden state.
+
 			for Name, Panel in Sections:GetChildren() do
-				Component.Switch(Panel, Default.Off)
+				Component.Switch(Panel, Keywords.Off)
 			end
 
+			-- Inverts the current popup state and applies to the selected panel.
+
 			Component.State = not Component.State
+
+			-- Animates and displays the matching panel.
 
 			return Component.Switch(Sections:FindFirstChild(Button.Name), Component.State)
 		end)

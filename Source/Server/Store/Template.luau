@@ -5,22 +5,22 @@ local Packages = Storage.Packages
 
 local Configuration = require(Dependencies.Configuration)
 
-local Default = Configuration.Default
+local Keywords = Configuration.Keywords
 
 -- Sorry, my ADHD got the best of me. I've went insane
 
 return {
-	Leaderboard = {
+	Board = {
 		Gold = 10,
 	},
 
 	Metadata = {
-		Wins = Default.Zero,
-		Losses = Default.Zero,
+		Wins = Keywords.Zero,
+		Losses = Keywords.Zero,
 
-		Level = Default.One,
+		Level = Keywords.One,
 
-		Playtime = Default.Zero, -- Probably in minutes
-		NumberOfGamesPlayed = Default.Zero,
+		Playtime = Keywords.Zero, -- Probably in minutes
+		NumberOfGamesPlayed = Keywords.Zero,
 	},
 }

@@ -9,7 +9,7 @@ local Knit = require(Packages.Knit)
 local Utilities = require(Dependencies.Utilities)
 local Configuration = require(Dependencies.Configuration)
 
-local Default = Configuration.Default
+local Keywords = Configuration.Keywords
 local Preferences = Configuration.Highlight
 
 local Camera = Utilities.GetCameraAsync()
@@ -17,9 +17,11 @@ local Mouse = Utilities.GetMouseAsync()
 
 local Component = Knit.CreateController({
 	Name = "Projector",
+
+	Objects = {},
 })
 
-Component.Objects = {}
+Component.Piece = Keywords.Null
 
 -- Highlights valid movement squares based on the given trajectory
 
@@ -33,7 +35,7 @@ function Component:Project(Trajectory, Piece, Chessboard)
 	-- Clears existing highlights when any are currently active
 
 	if Utilities.isNotEmpty(Component.Objects) then
-		Component:Disconnect()
+		Component:Disconnect(Keywords.Off)
 	end
 
 	for Name, Direction in Trajectory do -- Loop sthrough each direction in the trajectory
@@ -62,12 +64,10 @@ function Component:Project(Trajectory, Piece, Chessboard)
 		end
 	end
 
-	local Identifier = Piece:GetAttribute("Identifier")
-
 	-- Connects a Mouse Click listener to trigger square selection computati		local Position, Coordinates = Mouse.Hit.Position, Camera.CFrame
 
 	Component.Connection = Mouse.Button1Down:Connect(function()
-		return Component.ComputeSelectionUponClick(Piece, Identifier, Chessboard)
+		return Component:Compute(Piece, Chessboard)
 	end)
 
 	Component.Objects = Highlights -- Stores every active highlight for cleanup
@@ -75,7 +75,7 @@ end
 
 -- Listens for Mouse clicks and triggers square selection computation via raycasting.
 
-function Component.ComputeSelectionUponClick(Piece, Identifier, Chessboard)
+function Component:Compute(Piece, Chessboard)
 	local Service = Knit.GetService("Registry")
 
 	local Settings = Utilities.CreateRaycastParameters({
@@ -89,19 +89,23 @@ function Component.ComputeSelectionUponClick(Piece, Identifier, Chessboard)
 
 	local Raycast = workspace:Raycast(Coordinates.Position, Direction, Settings)
 
-	assert(Raycast.Instance, "Raycast Instance does not exist, retry again later.")
-
-	return Service:CheckAvailability(Piece, Raycast.Instance)
+	if Raycast then
+		return Service:CheckAvailability(Piece, Raycast.Instance)
+	end
 end
 
 -- Clears every highlight from the Chessboard
 
-function Component:Disconnect()
+function Component:Disconnect(ThenRevertCamera)
 	if Component.Connection then
 		Component.Connection:Disconnect()
 	end
 
-	Component.Connection = Default.Null
+	if ThenRevertCamera then
+		Camera.CameraType = Enum.CameraType.Custom
+	end
+
+	Component.Connection = Keywords.Null
 
 	for Name, Object in Component.Objects do -- Loops through the stored highlights
 		Object:Destroy() -- Removes the highlight from the board
@@ -111,10 +115,19 @@ function Component:Disconnect()
 end
 
 function Component:KnitStart()
-	local Service = Knit.GetService("Registry")
+	local Initialization = Knit.GetService("BoardInitialization")
+	local Registry = Knit.GetService("Registry")
 
-	Service.Disconnect:Connect(function()
-		return Component:Disconnect()
+	Registry.Disconnect:Connect(function()
+		return Component:Disconnect(Keywords.Off)
+	end)
+
+	Initialization.Draw:Connect(function()
+		return Component:Disconnect(Keywords.On)
+	end)
+
+	Initialization.Resignation:Connect(function()
+		return Component:Disconnect(Keywords.On)
 	end)
 end
 

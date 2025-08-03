@@ -12,7 +12,7 @@ local Knit = require(Packages.Knit)
 
 local Promise = require(Packages.Promise)
 
-local Default = Configuration.Default
+local Keywords = Configuration.Keywords
 local Cooldown = Configuration.Cooldown
 
 local PlayerGui = Utilities.GetDisplayAsync()
@@ -39,11 +39,11 @@ local Requests = Queue.new()
 
 --[[
 	Handles incoming challenge requests by adding them to the queue.
-	
+
 	When enqueuing, it also triggers the display immediately via callback.
 ]]
 
-local Signal, OngoingSessions = Default.Null, {}
+local Signal, OngoingSessions = Keywords.Null, {}
 
 function Component.Process(Opponent)
 	Requests:Enqueue(Opponent, function()
@@ -60,18 +60,21 @@ end
 
 function Component.Reset(myIndex)
 	-- Remove the session from the active sessions table to clean up
+
 	table.remove(OngoingSessions, myIndex)
 
 	return Promise.new(function()
 		Animation:Create(Popup, Settings.Animation, {
-			GroupTransparency = Default.One, -- Fully transparent
+			GroupTransparency = Keywords.One, -- Fully transparent
 		}):Play()
 
 		-- Wait for the specified delay before fully hiding the popup
+
 		task.wait(Settings.Delay)
 
 		-- Hide the popup
-		Popup.Visible = Default.Off
+
+		Popup.Visible = Keywords.Off
 	end)
 end
 
@@ -119,12 +122,12 @@ function Component.Display(Opponent)
 		return Component.Reset(myIndex)
 	end)
 
-	Popup.Visible = Default.On
+	Popup.Visible = Keywords.On
 
 	-- Animates the popup's GroupTransparency property
 
 	Animation:Create(Popup, Settings.Animation, {
-		GroupTransparency = Default.Zero,
+		GroupTransparency = Keywords.Zero,
 	}):Play()
 
 	-- Simulate user interaction delay or cooldown

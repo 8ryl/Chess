@@ -5,7 +5,7 @@ local Packages = Storage.Packages
 
 local Configuration = require(Dependencies.Configuration)
 
-local Default = Configuration.Default
+local Keywords = Configuration.Keywords
 
 local Queue = {}
 
@@ -26,8 +26,8 @@ Queue.__index = Queue
 function Queue.new()
 	return setmetatable({
 		Queue = {}, -- Stores items in the queue
-		Start = Default.One, -- Index of the first item (initially set to one)
-		Finish = Default.Zero, -- Index of the last item (starts at zero, meaning empty queue)
+		Start = Keywords.One, -- Index of the first item (initially set to one)
+		Finish = Keywords.Zero, -- Index of the last item (starts at zero, meaning empty queue)
 	}, Queue)
 end
 
@@ -41,7 +41,7 @@ end
 ]]
 
 function Queue:Enqueue(Item, Callback)
-	self.Finish += Default.One -- Move the finish index forward
+	self.Finish += Keywords.One -- Move the finish index forward
 	self.Queue[self.Finish] = Item -- Store the item at the finish index
 
 	-- Calls the callback function after enqueuing, if one was provided.
@@ -54,7 +54,7 @@ end
 --[[
 	Removes and returns the first item in the queue (dequeue).
 
-	@param Item - (Optional, unused here) The item to remove (default behavior removes the first item).
+	@param Item - (Optional, unused here) The item to remove (Keywords behavior removes the first item).
 	@return The dequeued item, or a warning message if the queue is empty.
 ]]
 
@@ -65,8 +65,8 @@ function Queue:Dequeue()
 
 	local Object = self.Queue[self.Start] -- Get the first item in the queue
 
-	self.Queue[self.Start] = Default.Null -- Clear the reference for garbage collection
-	self.Start += Default.One -- Move the start index forward
+	self.Queue[self.Start] = Keywords.Null -- Clear the reference for garbage collection
+	self.Start += Keywords.One -- Move the start index forward
 
 	return Object
 end
@@ -86,7 +86,7 @@ end
 ]]
 
 function Queue:Size()
-	return self.Finish - self.Start + Default.One
+	return self.Finish - self.Start + Keywords.One
 end
 
 return Queue

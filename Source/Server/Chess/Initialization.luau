@@ -2,44 +2,49 @@ local Server = game:GetService("ServerScriptService")
 local Storage = game:GetService("ReplicatedStorage")
 local Assets = game:GetService("ServerStorage")
 
-local Vault = Server.Storage
-local Packages = Storage.Packages
 local Dependencies = Storage.Dependencies
-
-local Chess = Assets.Chessboard
+local Packages = Storage.Packages
 local Directory = Server.Storage
+local Chess = Directory.Chess
+
+local Arbiter = Chess.Arbiter
+
+local Chessboard = Assets.Chessboard
 
 local Knit = require(Packages.Knit)
-local Schema = require(Vault.Schema)
+local Schema = require(Arbiter.Schema)
 local Settings = require(Dependencies.Settings)
 local Utilities = require(Dependencies.Utilities)
 local Configuration = require(Dependencies.Configuration)
 
--- Knit service responsible for initializing and deploying chessboards for matches
+-- Knit service for creating, positioning, and managing chessboards during match sessions
 local Service = Knit.CreateService({
 	Name = "BoardInitialization",
 
 	Client = {
-		All = Knit.CreateSignal(), -- Signal to notify clients about board setup
+		All = Knit.CreateSignal(), -- Broadcasts board setup to connected players
+		Draw = Knit.CreateSignal(), -- Sends draw outcome details to connected players
+		Resignation = Knit.CreateSignal(), -- Sends resignation outcome details to connected players
 	},
 
-	Board = {}, -- Namespace for board-related methods
+	Board = {}, -- Holds chessboard-specific functions
 })
 
 local Client = Service.Client
 local Matches = Schema.Matches
+local Keywords = Configuration.Keywords
 
--- Initializes a new chessboard for a match
+-- Generates a new chessboard model and places it in the match environment
 
 function Service.Board:Initialize(Content)
-	-- Clone the chessboard model and assign its identifier and parent
+	-- Creates a copy of the chessboard model, assigns the match identifier, and attaches it to the workspace
 
-	local Chessboard = Utilities.CloneInstance(Chess, {
+	local Chessboard = Utilities.CloneInstance(Chessboard, {
 		Name = Content.Identifier,
 		Parent = workspace.Matches,
 	})
 
-	-- Position the chessboard based on the number of active matches
+	-- Moves the chessboard to a location based on the number of currently active matches
 
 	Chessboard:PivotTo(
 		CFrame.new(Vector3.new(Settings.Offset.X * #Matches, Settings.Offset.Y, Settings.Offset.Z * #Matches))
@@ -48,54 +53,132 @@ function Service.Board:Initialize(Content)
 	return Chessboard
 end
 
--- Deploys the chessboard and notifies all competitors
+-- Sets up a chessboard and communicates the setup to all players in the match
 
-function Service:Deploy(Content)
-	-- Initialize and position the chessboard for this match
+function Service:Deploy(Identifier, Content)
+	Content.Identifier = Identifier
+
+	-- Builds and places the chessboard for this specific match session
 
 	Content.Board = Service.Board:Initialize(Content)
 
-	-- Added in a wait function to make sure the board fully loaded in.
+	-- Waits briefly to guarantee the board assets finish loading
 
 	task.wait(Configuration.Delay.Semi)
 
-	-- Loop through each individual pieces inside the concurrent directory
+	-- Populates the internal storage table with all chess pieces from the created chessboard
 
-	for Name, Folder in Content.Board.Pieces:GetChildren() do
+	local Board = Content.Board
+
+	for Name, Folder in Board.Pieces:GetChildren() do
 		for Set, Piece in Folder:GetChildren() do
-			-- Retrieve the stored coordinates from the piece's attributes
+			-- Retrieves the coordinate data stored in the piece attributes
 
 			local Coordinates = Piece:GetAttribute("Coordinates")
 
-			-- yAxis refers to the vertical columns, while xAxis refers to the horizontal rows.
+			-- Maps Offset as the vertical index (y-axis) and Scale as the horizontal index (x-axis)
 
 			local yAxis, xAxis = Coordinates.Offset, Coordinates.Scale
 
-			-- Ensures the Row table exists before assigning a value to a specific column.
+			-- Prepares the row table in storage for incoming column data
 
 			if not Content.Storage[xAxis] then
 				Content.Storage[xAxis] = {}
 			end
 
-			-- Stores the coordinates into the content's internal storage with it's piece
+			-- Inserts the piece into the storage table using its grid coordinates
 
 			Content.Storage[xAxis][yAxis] = Piece
 
-			-- Assign a unique identifier to the piece for tracking or grouping
+			-- Tags the piece with the current match identifier for tracking
 
-			Piece:SetAttribute("Identifier", Content.Identifier)
+			Piece:SetAttribute("Identifier", Identifier)
 		end
 	end
 
-	-- Notify competitors about their assigned board and pieces
+	-- Notifies all participating players of their orientation, pieces, and board assignment
 
 	for Name, Competitor in Content.Competitors do
-		Client.All:Fire(Competitor.User, Content.Board, Settings.Orientation[Name], Content.Board.Pieces[Name])
+		Client.All:Fire(Competitor.Contender, Board, Settings.Orientation[Name], Board.Pieces[Name])
 	end
 
-	-- Register this match into the active matches list
+	-- Records this match and its data in the active matches registry
 
-	Schema.Matches[Content.Identifier] = Content
+	Schema.Matches[Identifier] = Content
+end
+
+-- Handles the resignation outcome for a given match and rewards the winner
+
+function Service:Resign(Identifier, Winner: "Black" | "White")
+	local Database = Knit.GetService("Database")
+
+	-- Verifies that the match session exists in the active registry
+
+	if not Schema.Matches[Identifier] then
+		return "Invalid operation: no active match session associated with the provided Identifier."
+	end
+
+	local Content = Schema.Matches[Identifier]
+	local User = Content.Competitors[Winner]
+
+	if not Database:RetrieveDataAsynchronously(User.Contender) then
+		return "Operation aborted: persistent profile data unavailable for the specified user."
+	end
+
+	-- Adds logic for ending the match timer later
+
+	local Data = Database:RetrieveDataAsynchronously(User.Contender)
+
+	-- Increases the player’s stored currency value for winning the match
+
+	Data.Board[Schema.Currency] += Keywords.One
+
+	-- Sends a disconnect signal to both players to end the session
+
+	for Name, Competitor in Content.Competitors do
+		Client.Disconnect:Fire(Competitor.Contender, User)
+	end
+
+	-- Removes the chessboard model from the game and frees memory
+
+	Content.Board:Destroy()
+end
+
+-- Handles a draw outcome by rewarding both players and cleaning up the match
+function Service:Draw(Identifier, Cause)
+	local Database = Knit.GetService("Database")
+
+	-- Verifies that the match session exists in the active registry
+
+	if not Schema.Matches[Identifier] then
+		return "Invalid operation: no active match session associated with the provided Identifier."
+	end
+
+	-- Adds logic for ending the match timer later
+
+	local Content = Schema.Matches[Identifier]
+
+	-- Processes both players’ rewards and notifies them of the draw result
+
+	for Name, Competitor in Content.Competitors do
+		if not Database:RetrieveDataAsynchronously(Competitor.Contender) then
+			return "Operation aborted: persistent profile data unavailable for the specified user."
+		end
+
+		local Data = Database:RetrieveDataAsynchronously(Competitor.Contender)
+
+		-- Adds half the standard currency reward to each player’s profile data
+
+		Data.Board[Schema.Currency] += 0.5
+
+		-- Notifies the player about the draw cause
+
+		Client.Draw:Fire(Competitor.Contender, Cause)
+	end
+
+	-- Removes the chessboard model from the game and frees memory
+
+	Content.Board:Destroy()
 end
 
 return Service

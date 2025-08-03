@@ -14,6 +14,8 @@
 ]]
 
 return {
+	Currency = "Gold",
+
 	Trajectory = { -- Template container for directional movement vectors used in pathfinding.
 		Vertical = {}, -- Vertical movement path
 		Horizontal = {}, -- Horizontal movement path

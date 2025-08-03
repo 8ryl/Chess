@@ -1,5 +1,4 @@
 --[[
-    Module: Chrono
     Purpose:
         Handles the time management system for chess matches. 
         Maintains individual timers for both players, tracks elapsed and remaining time, 
@@ -16,4 +15,25 @@
         time-based state changes across server and client.
 ]]
 
---TODO: Implement chronometer logic. Plan it out before working on it
+local Storage = game:GetService("ReplicatedStorage")
+
+local Dependencies = Storage.Dependencies
+local Packages = Storage.Packages
+
+local Knit = require(Packages.Knit)
+
+local Service = Knit.CreateService({
+	Name = "Chrono",
+
+	Client = {
+		Update = Knit.CreateSignal(),
+	},
+})
+
+function Service:new() end
+
+function Service:Resume() end
+
+function Service:Pause() end
+
+return Service

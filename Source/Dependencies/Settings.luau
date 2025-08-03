@@ -38,16 +38,19 @@ return {
 	Modes = {
 		Rapid = {
 			Time = 10, -- Time per player in minutes (Chess.com)
+			Increment = 0, -- Increment per player in seconds.
 
 			-- You can add more properties here later, such as increment or delays
 		},
 
 		Blitz = {
 			Time = 2.5, -- Time per player in minutes (Chess.com)
+			Increment = 1.25, -- Increment per player in seconds.
 		},
 
-		Default = {
+		Keywords = {
 			Time = 15, -- Time per player in minutes (Chess.com)
+			Increment = 2.5, -- Increment per player in seconds.
 		},
 	},
 }

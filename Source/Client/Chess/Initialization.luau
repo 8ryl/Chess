@@ -9,10 +9,14 @@ local Settings = require(Dependencies.Settings)
 local Utilities = require(Dependencies.Utilities)
 local Configuration = require(Dependencies.Configuration)
 
-local Default = Configuration.Default
+local Keywords = Configuration.Keywords
 local Preferences = Settings.Camera
 
 local Client = Utilities.GetClientAsync()
+local PlayerGui = Utilities.GetDisplayAsync()
+
+local Display = PlayerGui:WaitForChild("Display")
+local Interface = Display:WaitForChild("Interface")
 
 --[[
 	Knit controller that listens for chessboard initialization events.
@@ -25,6 +29,7 @@ local Component = Knit.CreateController({
 	Name = "ChessInitializationListener",
 })
 
+Component.Connections = {}
 Component.Cache = {}
 
 -- Adjusts the camera to focus on the chessboard from above, considering orientation
@@ -47,9 +52,9 @@ function Component.Camera(Chessboard, Orientation)
 	]]
 
 	local Base = CFrame.new(Center)
-		* CFrame.Angles(Default.Zero, Yaw, Default.Zero)
-		* CFrame.new(Default.Zero, Preferences.Offset.Y, Preferences.Offset.Z)
-		* CFrame.Angles(Preferences.Tilt.X, Default.Zero, Default.Zero)
+		* CFrame.Angles(Keywords.Zero, Yaw, Keywords.Zero)
+		* CFrame.new(Keywords.Zero, Preferences.Offset.Y, Preferences.Offset.Z)
+		* CFrame.Angles(Preferences.Tilt.X, Keywords.Zero, Keywords.Zero)
 
 	-- Set the camera to look toward the center of the chessboard from the computed position
 
@@ -58,6 +63,28 @@ function Component.Camera(Chessboard, Orientation)
 	-- Switch camera to Scriptable mode to allow full manual control
 
 	Camera.CameraType = Enum.CameraType.Scriptable
+end
+
+function Component:Display(Interface, Console)
+	local Popup = Knit.GetController("Popup")
+
+	for Name, Object in Interface:GetChildren() do
+		if not Object:IsA("GuiObject") then
+			continue
+		end
+
+		Object.Visible = Keywords.Off
+	end
+
+	for Name, Object in Console:GetChildren() do
+		if not Object:IsA("GuiObject") then
+			continue
+		end
+
+		Object.Visible = Keywords.On
+	end
+
+	return Popup:Reset(Keywords.Off)
 end
 
 -- Adds sensors (aka ClickDetectors) to chess pieces for interaction.
@@ -82,7 +109,7 @@ function Component.Sensors(Chessboard, Pieces)
 
 		-- Sets up the detector to respond to click input on this piece
 
-		Sensor.MouseClick:Connect(function()
+		local Connection = Sensor.MouseClick:Connect(function()
 			-- Retrieves the cached path for the object, or invoke the service method and await the result
 
 			--[[
@@ -94,6 +121,10 @@ function Component.Sensors(Chessboard, Pieces)
 				return Service[Attribute](Client, Object)
 			end)
 			]]
+
+			if Object:GetAttribute("State") ~= "None" then
+				return "Capture state active for the piece."
+			end
 
 			-- Disconnects an ongoing connection when there is one.
 
@@ -107,6 +138,12 @@ function Component.Sensors(Chessboard, Pieces)
 
 			assert(Status, "Failed to retrieve path for the specified piece via service method.")
 
+			-- Guard statement for piece mobility turns.
+
+			if typeof(Path) ~= "table" then
+				return "Could not process move path: expected table structure."
+			end
+
 			-- Assigns the computed path to the cache only when no cached entry exists.
 
 			if not Component.Cache[Object] then
@@ -117,6 +154,8 @@ function Component.Sensors(Chessboard, Pieces)
 
 			return Projector:Project(Path, Object, Chessboard)
 		end)
+
+		table.insert(Component.Connections, Connection)
 	end
 end
 
@@ -128,12 +167,30 @@ end
 ]]
 
 function Component:KnitStart()
-	local Service = Knit.GetService("BoardInitialization")
+	local Initialization = Knit.GetService("BoardInitialization")
 
 	-- Connects to the board initialization signal to set up the camera and piece sensors.
 
-	Service.All:Connect(function(Chessboard, Orientation, Pieces)
-		return Component.Camera(Chessboard, Orientation), Component.Sensors(Chessboard, Pieces)
+	Initialization.All:Connect(function(Chessboard, Orientation, Pieces)
+		return Component.Camera(Chessboard, Orientation),
+			Component:Display(Interface, Interface.Console),
+			Component.Sensors(Chessboard, Pieces)
+	end)
+
+	Initialization.Resignation:Connect(function(Winner)
+		-- TODO: Implement frontend winner animations
+
+		for Name, Connection in Component.Connections do
+			Connection:Disconnect()
+		end
+	end)
+
+	Initialization.Draw:Connect(function(Cause)
+		-- TODO: Implement frontend Draw animations
+
+		for Name, Connection in Component.Connections do
+			Connection:Disconnect()
+		end
 	end)
 end
 

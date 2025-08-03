@@ -8,7 +8,7 @@ local Configuration = require(Dependencies.Configuration)
 local Utilities = require(Dependencies.Utilities)
 local Knit = require(Packages.Knit)
 
-local Default = Configuration.Default
+local Keywords = Configuration.Keywords
 
 local PlayerGui = Utilities.GetDisplayAsync()
 
@@ -32,7 +32,7 @@ function Component.Add(Client)
 	local Signal = Knit.GetService("Signal")
 
 	local Clone = Utilities.CloneInstance(Container.Object, {
-		Visible = Default.On,
+		Visible = Keywords.On,
 		Parent = Holder,
 	})
 
@@ -55,7 +55,9 @@ end
 -- Removes a player entry from the Compete section's user interface
 
 function Component.Remove(Client)
-	return Holder:FindFirstChild(Client.DisplayName):Destroy()
+	if Holder:FindFirstChild(Client.DisplayName) then
+		return Holder:FindFirstChild(Client.DisplayName):Destroy()
+	end
 end
 
 -- Initializes the Compete controller when Knit starts.

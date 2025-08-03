@@ -16,14 +16,17 @@ local Configuration = require(Dependencies.Configuration)
 local Utilities = require(Dependencies.Utilities)
 
 local Cooldown = Configuration.Cooldown
-local Default = Configuration.Default
+local Keywords = Configuration.Keywords
 
 local Service = Knit.CreateService({
-	Name = "DatabaseHandlerModule",
+	Name = "Database",
 
 	Client = {},
 	Profiles = {},
 })
+
+local Client = Service.Client
+local Profiles = Service.Profiles
 
 -- Change the database name before releasing to reset the data.
 
@@ -38,20 +41,28 @@ type Profile = typeof(Database:StartSessionAsync())
 
 -- Returns a unique key string for the player's profile.
 
-function Service.RetrieveProfileKeyIdentifier(Client: Player)
-	return tostring(Client.UserId)
+function Service.RetrieveProfileKeyIdentifier(User: Player)
+	return tostring(User.UserId)
 end
 
 -- Allows the client to fetch their saved data.
 
-function Service.Client.GetProfileDataAsync(Client: Player)
-	return Service.Profiles[Client].Data
+function Service:RetrieveDataAsynchronously(User: Player)
+	return Profiles[User].Data
+end
+
+function Service:RetrieveProfileAsynchronously(User: Player)
+	return Profiles[User]
+end
+
+function Client:RetrieveDataAsynchronously(User: Player)
+	return Service:RetrieveDataAsynchronously(User)
 end
 
 -- Removes the player's profile from memory upon disconnection.
 
-function Service.Remove(Player: Player)
-	Service.Profiles[Player] = Default.Null
+function Service:Remove(User: Player)
+	Service.Profiles[User] = Keywords.Null
 end
 
 --[[
@@ -60,20 +71,13 @@ end
   - Starts a data session for the player.
   - Kicks the player if their profile can't be loaded.
   - Adds GDPR-compliant user ID tracking.
-  - Fills missing data fields with default values.
+  - Fills missing data fields with Keywords values.
   - Handles session locking and auto-disconnects.
   - If the player has already left, the session is ended immediately.
   - Otherwise, sets up the leaderboard and stores the profile.
 ]]
 
 function Service.Connect(Client: Player)
-	--[[
-    Starts a data session for the player.
-
-  - Generates a unique profile key for the player.
-  - Cancels the session if the player has left before it finishes.
-  ]]
-
 	local Profile: Profile = Database:StartSessionAsync(Service.RetrieveProfileKeyIdentifier(Client), {
 		Cancel = function()
 			return not Client:IsDescendantOf(Contenders)
@@ -93,7 +97,7 @@ function Service.Connect(Client: Player)
 
 	Profile.OnSessionEnd:Connect(function()
 		return Client:Kick("Anomalous behavior identified — operation temporarily suspended. retry again later."),
-			Service.Remove(Client)
+			Service:Remove(Client)
 	end)
 
 	-- Check if the player is still in the game after session setup.
@@ -109,7 +113,7 @@ function Service.Connect(Client: Player)
 
 		Profile:EndSession()
 
-		return Service.Remove(Client)
+		return Service:Remove(Client)
 	end
 end
 
@@ -120,7 +124,7 @@ function Service.Disconnect(Client: Player)
 
 	assert(Profile, "No profile was found during the disconnection process.")
 
-	return Profile:EndSession(), Service.Remove(Client)
+	return Profile:EndSession(), Service:Remove(Client)
 end
 
 --[[
